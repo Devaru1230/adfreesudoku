@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sudoku — Ad-free</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FCFAF6; --ink:#22201A; --gold:#B08D3E; --gold-deep:#8C6D2C;
+  --muted:#8A8578; --line:#E4DECF; --line-strong:#22201A;
+  --sel:#F2EAD8; --peer:#F7F3E9; --same:#EADFC4; --err:#A63D2F; --err-bg:#F6E4E0;
+  --ok:#4A6B4F; --cellbg:#FFFFFF; --radius:2px;
+}
+[data-theme="clear"]{
+  --cream:#FFFFFF; --ink:#000000; --gold:#0B5CAD; --gold-deep:#084A8C;
+  --muted:#3F3F3F; --line:#ABABAB; --sel:#CFE5FB; --peer:#EFF5FB; --same:#B4D6F6;
+  --err:#C62828; --err-bg:#FBDCDC; --cellbg:#FFFFFF; --radius:2px;
+}
+[data-theme="night"]{
+  --cream:#171612; --ink:#F2EFE7; --gold:#D2A94E; --gold-deep:#E4C06A;
+  --muted:#9A947F; --line:#3A372E; --sel:#3A3320; --peer:#22201A; --same:#4A3E1E;
+  --err:#E06552; --err-bg:#46231D; --cellbg:#211F1A; --radius:2px;
+}
+[data-theme="candy"]{
+  --cream:#FFF6E5; --ink:#3D2B56; --gold:#F26B3A; --gold-deep:#D8541F;
+  --muted:#8A7AA0; --line:#F0DBB2; --sel:#FFE3B3; --peer:#FFF0D6; --same:#FFD48A;
+  --err:#E5484D; --err-bg:#FFE1E1; --cellbg:#FFFFFF; --radius:12px;
+}
+[data-theme="forest"]{
+  --cream:#F2F6EF; --ink:#1E2A20; --gold:#3F6B45; --gold-deep:#2E5133;
+  --muted:#6E7C6F; --line:#D3DFD1; --sel:#DCEBDA; --peer:#EDF3EB; --same:#C3DDC0;
+  --err:#A63D2F; --err-bg:#F6E4E0; --cellbg:#FFFFFF; --radius:4px;
+}
+[data-theme="ocean"]{
+  --cream:#F1F6FA; --ink:#12242E; --gold:#1C6E8C; --gold-deep:#14556E;
+  --muted:#69808C; --line:#CFDFE8; --sel:#D8EBF4; --peer:#EAF3F8; --same:#B7DCEC;
+  --err:#B3402F; --err-bg:#F8E3DE; --cellbg:#FFFFFF; --radius:4px;
+}
+[data-theme="rose"]{
+  --cream:#FDF3F3; --ink:#2B1A1E; --gold:#A8455C; --gold-deep:#87344A;
+  --muted:#8C7076; --line:#EBD5D8; --sel:#F8E1E6; --peer:#FCEFF1; --same:#F3C9D3;
+  --err:#9E3B2F; --err-bg:#F8E2DE; --cellbg:#FFFFFF; --radius:8px;
+}
+html{background:var(--cream)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button,.cell,.chip,.lvl,.num,.ctrl,.tab{touch-action:manipulation}
+html,body{height:100%}
+body{
+  background:var(--cream); color:var(--ink);
+  font-family:'Inter',system-ui,sans-serif;
+  display:flex; justify-content:center;
+  user-select:none; -webkit-user-select:none;
+}
+.app{width:100%;max-width:480px;padding:8px 10px 10px;display:flex;flex-direction:column;gap:7px}
+
+/* Masthead */
+.masthead{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:4px}
+.masthead h1{font-family:'Fraunces',serif;font-weight:700;font-size:18px;letter-spacing:.02em}
+.masthead h1 span{color:var(--gold)}
+.tabs{display:flex;gap:3px}
+.vchip{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;color:var(--muted);
+  border:none;background:none;cursor:pointer;padding:0 0 0 4px;align-self:flex-end}
+.upd-list{text-align:left;font-size:12px;line-height:1.6;color:var(--ink);margin:8px 0 4px}
+.upd-list b{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-deep);display:block;margin-top:8px}
+.lock{font-size:11px;opacity:.85}
+.lvl.locked,.theme-row.locked{opacity:.6}
+.probadge{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;background:var(--gold);color:#fff;
+  border-radius:999px;padding:2px 6px;margin-left:5px;vertical-align:middle}
+.pay-list{text-align:left;margin:10px 0;font-size:13px;line-height:1.75}
+.pay-list div{display:flex;gap:8px}
+.pay-list span{color:var(--gold-deep)}
+.price{font-family:'Fraunces',serif;font-size:34px;color:var(--gold);margin:6px 0 0}
+.price small{font-size:12px;color:var(--muted);font-family:'Inter',sans-serif;display:block;margin-top:2px}
+.tab{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 8px;border:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;border-radius:var(--radius)}
+.tab.active{background:var(--ink);color:var(--cream)}
+
+/* Status bar */
+.statusbar{display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.statusbar b{color:var(--ink);font-weight:500}
+.mistakes .pip{display:inline-block;width:8px;height:8px;border-radius:50%;border:1px solid var(--err);margin-left:3px;vertical-align:middle}
+.mistakes .pip.hit{background:var(--err)}
+#pauseBtn{border:1px solid var(--line);background:var(--cellbg);border-radius:var(--radius);padding:3px 8px;cursor:pointer;font-family:inherit;font-size:11px;color:var(--ink)}
+
+/* Board */
+.board-wrap{position:relative;margin:0 auto;width:min(100%, max(250px, calc(100dvh - 265px)))}
+.board{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);aspect-ratio:1;
+  border:2px solid var(--ink);background:var(--cellbg)}
+.cell{position:relative;display:flex;align-items:center;justify-content:center;border-radius:0;min-width:0;min-height:0;overflow:hidden;
+  border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  font-size:clamp(18px,5.4vw,26px);cursor:pointer;background:var(--cellbg)}
+.cell.b-r{border-right:2px solid var(--ink)}
+.cell.b-b{border-bottom:2px solid var(--ink)}
+.cell:nth-child(9n){border-right:none}
+.cell.peer{background:var(--peer)}
+.cell.same{background:var(--same)}
+.cell.sel{background:var(--sel);box-shadow:inset 0 0 0 2px var(--gold)}
+.cell.given{font-family:'Fraunces',serif;font-weight:600;color:var(--ink)}
+.cell.user{font-family:'Inter',sans-serif;font-weight:600;color:var(--gold-deep)}
+.cell.wrong{color:var(--err);background:var(--err-bg)}
+.cell .notes{position:absolute;inset:1px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
+.cell .notes span{font-family:'JetBrains Mono',monospace;font-size:clamp(7px,2vw,10px);color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:500}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes clashflash{0%,100%{box-shadow:none}40%{box-shadow:inset 0 0 0 3px var(--err)}}
+.cell.flash{animation:clashflash .45s ease}
+.cell .notes span.hit{color:var(--gold-deep);font-weight:700;transform:scale(1.25)}
+.praise{position:absolute;transform:translate(-50%,-100%);z-index:45;pointer-events:none;white-space:nowrap;
+  font-family:'Fraunces',serif;font-weight:700;font-size:15px;color:var(--gold-deep);
+  background:var(--cellbg);border:1px solid var(--gold);border-radius:999px;padding:4px 11px;
+  box-shadow:0 3px 10px rgba(0,0,0,.18);animation:praiseUp .95s ease-out forwards}
+@keyframes praiseUp{0%{opacity:0;margin-top:4px}18%{opacity:1}75%{opacity:1}100%{opacity:0;margin-top:-36px}}
+.cell.pop{animation:pop .18s ease-out}
+
+.pause-veil{position:absolute;inset:0;background:var(--cream);border:2px solid var(--ink);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.pause-veil.show{display:flex}
+.pause-veil p{font-family:'Fraunces',serif;font-size:20px}
+
+/* Controls */
+.controls{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.ctrl.dim{opacity:.35}
+.ctrl{border:1px solid var(--line);background:var(--cellbg);border-radius:var(--radius);padding:5px 2px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink)}
+.ctrl svg{width:15px;height:15px;stroke:var(--ink);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ctrl small{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.ctrl.on{border-color:var(--gold);background:var(--sel)}
+.ctrl.on small{color:var(--gold-deep)}
+.ctrl:active{transform:translateY(1px)}
+
+/* Number pad */
+.pad{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}
+.num{border:1px solid var(--line);background:var(--cellbg);border-radius:var(--radius);padding:6px 0 3px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:0}
+.num b{font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--ink)}
+.num small{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted)}
+.num.done{opacity:.25;pointer-events:none}
+.num:active{background:var(--sel)}
+.num.locked{border-color:var(--gold);background:var(--sel);box-shadow:inset 0 0 0 1px var(--gold)}
+.num.locked b{color:var(--gold-deep)}
+
+/* Level picker / modals */
+.veil{position:fixed;inset:0;background:rgba(34,32,26,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.veil.show{display:flex}
+.card{background:var(--cream);border:2px solid var(--ink);border-radius:calc(var(--radius) + 1px);max-width:340px;width:100%;padding:22px;text-align:center}
+.card h2{font-family:'Fraunces',serif;font-size:22px;margin-bottom:6px}
+.card p{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.card .stat-line{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink);margin-bottom:4px}
+.lvl-list{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.lvl{border:1px solid var(--ink);background:var(--cellbg);padding:11px;cursor:pointer;border-radius:var(--radius);
+  display:flex;justify-content:space-between;align-items:center}
+.lvl b{font-family:'Fraunces',serif;font-size:16px}
+.lvl small{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+.lvl:hover{background:var(--sel)}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--cream);padding:10px 18px;border-radius:var(--radius);cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-top:10px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.card .big-score{font-family:'Fraunces',serif;font-size:40px;color:var(--gold);margin:8px 0 2px}
+
+/* Trends view */
+.view{display:none;flex-direction:column;gap:12px}
+.view.show{display:flex}
+.trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tcard{border:1px solid var(--line);background:var(--cellbg);border-radius:var(--radius);padding:12px}
+.tcard small{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px}
+.tcard b{font-family:'Fraunces',serif;font-size:22px;font-weight:600}
+.tcard span{font-size:11px;color:var(--muted)}
+.chart-card{border:1px solid var(--line);background:var(--cellbg);border-radius:var(--radius);padding:14px}
+.chart-card h3{font-family:'Fraunces',serif;font-size:15px;margin-bottom:8px}
+canvas{width:100%;height:auto;display:block}
+.diff-table{width:100%;border-collapse:collapse;font-size:12px}
+.diff-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
+.diff-table td{padding:7px 4px;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace}
+.empty-note{text-align:center;color:var(--muted);font-size:13px;padding:30px 10px;line-height:1.6}
+.footer-note{text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--muted);margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:8px 0 10px}
+.chip{border:1px solid var(--line);background:var(--cellbg);border-radius:var(--radius);padding:8px 12px;cursor:pointer;
+  font-family:'Fraunces',serif;font-size:14px;color:var(--ink)}
+.chip.picked{border-color:var(--gold);background:var(--sel);box-shadow:inset 0 0 0 1px var(--gold)}
+.reroll{background:none;border:none;color:var(--gold-deep);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;text-decoration:underline;margin-bottom:8px}
+.name-input{width:100%;border:1px solid var(--line);border-radius:var(--radius);padding:10px;font-family:'Inter',sans-serif;font-size:14px;text-align:center;background:var(--cellbg);color:var(--ink)}
+.name-input:focus{outline:none;border-color:var(--gold)}
+.rank-card{border:2px solid var(--ink);background:var(--cellbg);border-radius:calc(var(--radius) + 1px);padding:16px;text-align:center}
+.rank-card .pname{font-family:'Fraunces',serif;font-size:22px;font-weight:700}
+.rank-card .tier{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);margin:2px 0 6px}
+.rank-card .rating{font-family:'Fraunces',serif;font-size:38px;color:var(--gold)}
+.rank-card .sub{font-size:11px;color:var(--muted);margin-top:2px}
+.rank-card .btn{margin-top:12px}
+.lb-table{width:100%;border-collapse:collapse;font-size:12px}
+.lb-table td{padding:8px 4px;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace}
+.lb-table td.nm{font-family:'Inter',sans-serif;font-weight:600}
+.lb-table tr.me td{background:var(--sel);color:var(--gold-deep)}
+.lb-status{font-size:11px;color:var(--muted);padding:8px 0;text-align:center}
+.rating-note{font-size:10px;color:var(--muted);line-height:1.5;margin-top:8px}
+.theme-row{display:flex;justify-content:space-between;align-items:center;text-align:left}
+.theme-row .tname{display:flex;flex-direction:column;gap:2px}
+.theme-row .tname b{font-size:15px}
+.theme-row .tname small{font-family:'Inter',sans-serif;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0}
+.sw{width:15px;height:15px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.2);margin-left:4px;vertical-align:middle}
+.theme-row.picked{border-color:var(--gold);background:var(--sel)}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--cream);
+  padding:10px 16px;border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:11px;
+  z-index:90;opacity:0;transition:opacity .25s;pointer-events:none;max-width:92%;text-align:center;line-height:1.5}
+.toast.show{opacity:1}
+.tut-step{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--gold-deep);margin-bottom:4px}
+.tut-icon{font-size:30px;margin-bottom:6px}
+.auto-bar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(90px);
+  background:var(--ink);color:var(--cream);border-radius:calc(var(--radius) + 2px);
+  padding:10px 12px;display:flex;align-items:center;gap:10px;z-index:60;
+  box-shadow:0 6px 18px rgba(0,0,0,.28);transition:transform .3s ease;max-width:92%}
+.auto-bar{visibility:hidden}
+.auto-bar.show{transform:translateX(-50%) translateY(0);visibility:visible}
+.auto-bar span{font-size:12px;line-height:1.4}
+.auto-bar .go{border:1px solid var(--cream);background:transparent;color:var(--cream);
+  border-radius:var(--radius);padding:7px 12px;cursor:pointer;font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.auto-bar .dismiss{background:none;border:none;color:var(--cream);font-size:16px;cursor:pointer;padding:2px 6px;opacity:.7}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="masthead">
+    <h1>SUDO<span>KU</span></h1>
+    <div class="tabs">
+      <button class="tab active" id="tabPlay">Play</button>
+      <button class="tab" id="tabTrends">Trends</button>
+      <button class="tab" id="themeBtn" title="Themes">🎨</button>
+      <button class="tab" id="helpBtn" title="How to play">?</button>
+      <button class="vchip" id="verChip" title="Version">v0.0</button>
+      <button class="tab" id="proChip" title="Pro" style="display:none">★</button>
+    </div>
+  </div>
+
+  <!-- PLAY VIEW -->
+  <div class="view show" id="viewPlay">
+    <div class="statusbar">
+      <span id="lvlLabel"><b>Medium</b></span>
+      <span class="mistakes" id="mistakes">Mistakes<span class="pip"></span><span class="pip"></span><span class="pip"></span></span>
+      <span>Score <b id="score">0</b></span>
+      <span><b id="timer">00:00</b> <button id="pauseBtn">⏸</button></span>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+      <div class="pause-veil" id="pauseVeil">
+        <p>Paused</p>
+        <button class="btn" id="resumeBtn">Resume</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl" id="undoBtn">
+        <svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>
+        <small>Undo</small>
+      </button>
+      <button class="ctrl" id="eraseBtn">
+        <svg viewBox="0 0 24 24"><path d="M20 20H8L3 15a2 2 0 0 1 0-3l8-8a2 2 0 0 1 3 0l6 6a2 2 0 0 1 0 3l-6 7"/></svg>
+        <small>Erase</small>
+      </button>
+      <button class="ctrl" id="pencilBtn">
+        <svg viewBox="0 0 24 24"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        <small>Pencil <span id="pencilState">off</span></small>
+      </button>
+      <button class="ctrl" id="lightBtn">
+        <svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+        <small>Lightning <span id="lightState">off</span></small>
+      </button>
+      <button class="ctrl" id="hintBtn">
+        <svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 4.9 12 5 5 0 0 0-1.4 2.5V18h-7v-1.5A5 5 0 0 0 7.1 14 7 7 0 0 1 12 2z"/></svg>
+        <small>Hint <span id="hintCount">3</span></small>
+      </button>
+      <button class="ctrl" id="newBtn">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+        <small>New game</small>
+      </button>
+    </div>
+
+    <div class="pad" id="pad"></div>
+  </div>
+
+  <!-- TRENDS VIEW -->
+  <div class="view" id="viewTrends">
+    <div id="trendsBody"></div>
+    <div class="footer-note" id="footNote">No ads. No tracking. Your stats stay on this device.</div>
+  </div>
+</div>
+
+<!-- Level picker -->
+<div class="veil" id="lvlVeil">
+  <div class="card">
+    <h2>New game</h2>
+    <p>Pick a level. Three mistakes ends the game.</p>
+    <div class="lvl-list">
+      <button class="lvl" id="dailyBtn" style="border-width:2px"><b>⭐ Daily #<span id="dailyNumLbl"></span></b><small id="dailyState"></small></button>
+      <button class="lvl" data-d="0"><b>Easy</b><small>score ×1</small></button>
+      <button class="lvl" data-d="1"><b>Medium</b><small>score ×1.5</small></button>
+      <button class="lvl" data-d="2"><b>Hard</b><small>score ×2</small></button>
+      <button class="lvl" data-d="3"><b>Expert</b><small>score ×3</small></button>
+      <button class="lvl" id="zenBtn"><b>🧘 Zen</b><small>no mistake limit, no timer</small></button>
+    </div>
+    <button class="btn ghost" id="lvlCancel">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="auto-bar" id="autoBar">
+  <span>Almost there — want me to fill in the rest?</span>
+  <button class="go" id="autoGo">Finish it</button>
+  <button class="dismiss" id="autoDismiss">✕</button>
+</div>
+
+<div class="auto-bar" id="apBar">
+  <span>Auto-pencil unlocked — fill candidate notes in every empty cell?</span>
+  <button class="go" id="apGo">Fill notes</button>
+  <button class="dismiss" id="apDismiss">✕</button>
+</div>
+
+<!-- Tutorial -->
+<div class="veil" id="tutVeil">
+  <div class="card">
+    <div class="tut-step" id="tutStep"></div>
+    <div class="tut-icon" id="tutIcon"></div>
+    <h2 id="tutTitle"></h2>
+    <p id="tutBody"></p>
+    <button class="btn" id="tutNext">Next</button>
+    <button class="btn ghost" id="tutSkip">Skip</button>
+  </div>
+</div>
+
+<!-- Paywall -->
+<div class="veil" id="proVeil">
+  <div class="card">
+    <h2>Sudoku Pro</h2>
+    <p id="proWhy">No ads in either version — Pro opens the rest of the game. One payment, no subscription.</p>
+    <div class="pay-list">
+      <div><span>✓</span><b>Hard &amp; Expert levels</b></div>
+      <div><span>✓</span>Zen mode — no mistake limit, no timer</div>
+      <div><span>✓</span>Auto-pencil &amp; auto-complete</div>
+      <div><span>✓</span>All 7 themes including 3 Pro-only</div>
+      <div><span>✓</span>10 hints to start, +1 every 3 wins</div>
+      <div><span>✓</span>Unlimited undo</div>
+      <div><span>✓</span>Full trends, charts &amp; level breakdown</div>
+    </div>
+    <div class="price">₹99<small>one-time · includes every future update</small></div>
+    <button class="btn" id="proBuy">Unlock Pro</button>
+    <div class="rating-note" id="webNote" style="display:none">Pro unlocks are handled by Google Play, so they're available in the Android app.</div>
+    <button class="btn ghost" id="proRestore">Restore purchase</button>
+    <button class="btn ghost" id="proClose">Not now</button>
+  </div>
+</div>
+
+<!-- Version / update -->
+<div class="veil" id="verVeil">
+  <div class="card">
+    <h2>Sudoku <span id="verLabel"></span></h2>
+    <p>Ad-free, offline, private. Share the file with anyone.</p>
+    <div class="upd-list" id="verNotes"></div>
+    <button class="btn" id="verGoPro">Unlock Pro — ₹99</button>
+    <button class="btn ghost" id="verShare">Send this version on WhatsApp</button>
+    <button class="btn ghost" id="verReset">Reset scores &amp; start clean</button>
+    <button class="btn ghost" id="verClose">Close</button>
+  </div>
+</div>
+
+<!-- Themes -->
+<div class="veil" id="themeVeil">
+  <div class="card">
+    <h2>Theme</h2>
+    <p>Changes apply instantly, for every screen.</p>
+    <div class="lvl-list" id="themeList"></div>
+    <button class="btn" id="themeDone">Done</button>
+  </div>
+</div>
+
+<!-- One-time player name -->
+<div class="veil" id="nameVeil">
+  <div class="card">
+    <h2>Pick your player name</h2>
+    <p>One time only, so choose well. It stays on this device — no account, no email, nothing leaves your phone.</p>
+    <div class="chips" id="nameChips"></div>
+    <button class="reroll" id="reroll">Suggest different names</button>
+    <input class="name-input" id="nameInput" maxlength="20" placeholder="…or type your own">
+    <button class="btn" id="nameSave">Lock it in</button>
+  </div>
+</div>
+
+<!-- End of game -->
+<div class="veil" id="endVeil">
+  <div class="card">
+    <h2 id="endTitle">Solved</h2>
+    <div class="big-score" id="endScore">0</div>
+    <p id="endDetail"></p>
+    <button class="btn" id="waShare">Share on WhatsApp</button>
+    <button class="btn ghost" id="endNew">New game</button>
+    <button class="btn ghost" id="endClose">View the board</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ---------- storage (localStorage when available, memory fallback) ---------- */
+/* ================================================================
+   LEADERBOARD CONFIG — to turn on the live global leaderboard:
+   1. Create a free project at supabase.com
+   2. Run the SQL Claude gave you (creates the sudoku_players table)
+   3. Paste your Project URL and anon public key below, save, re-share the file
+   Leave blank = leaderboard stays off, game works fully offline.
+   ================================================================ */
+const LB = { url: "", key: "" };
+const LB_TABLE = "sudoku_players";
+function lbOn(){ return !!(LB.url && LB.key); }
+
+const store = (() => {
+  let mem = {};
+  let ok = false;
+  try { localStorage.setItem("__t","1"); localStorage.removeItem("__t"); ok = true; } catch(e){ ok = false; }
+  return {
+    get(k, fb){ try { if(ok){ const v = localStorage.getItem(k); return v==null?fb:JSON.parse(v);} } catch(e){} return (k in mem)?mem[k]:fb; },
+    set(k, v){ try { if(ok){ localStorage.setItem(k, JSON.stringify(v)); return; } } catch(e){} mem[k]=v; }
+  };
+})();
+
+/* ---------- sudoku engine ---------- */
+let RNG = Math.random;
+const rnd = n => Math.floor(RNG()*n);
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function shuffled(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];} return a; }
+const rowOf=i=>Math.floor(i/9), colOf=i=>i%9, boxOf=i=>Math.floor(rowOf(i)/3)*3+Math.floor(colOf(i)/3);
+const PEERS = []; // precomputed peer indices per cell
+for(let i=0;i<81;i++){
+  const s=new Set();
+  for(let j=0;j<81;j++){ if(j!==i && (rowOf(j)===rowOf(i)||colOf(j)===colOf(i)||boxOf(j)===boxOf(i))) s.add(j); }
+  PEERS.push([...s]);
+}
+function candidates(bd,i){
+  const used=new Set();
+  for(const p of PEERS[i]) if(bd[p]) used.add(bd[p]);
+  const out=[]; for(let d=1;d<=9;d++) if(!used.has(d)) out.push(d);
+  return out;
+}
+function solveFill(bd){ // fills bd in place with a random valid solution; returns bool
+  let best=-1, bestC=null;
+  for(let i=0;i<81;i++){ if(!bd[i]){ const c=candidates(bd,i); if(c.length===0) return false;
+    if(bestC===null||c.length<bestC.length){ best=i; bestC=c; if(c.length===1) break; } } }
+  if(best===-1) return true;
+  for(const d of shuffled(bestC)){ bd[best]=d; if(solveFill(bd)) return true; bd[best]=0; }
+  return false;
+}
+function countSolutions(bd, limit){
+  let count=0;
+  (function go(){
+    if(count>=limit) return;
+    let best=-1,bestC=null;
+    for(let i=0;i<81;i++){ if(!bd[i]){ const c=candidates(bd,i); if(c.length===0) return;
+      if(bestC===null||c.length<bestC.length){ best=i;bestC=c; if(c.length===1) break; } } }
+    if(best===-1){ count++; return; }
+    for(const d of bestC){ bd[best]=d; go(); bd[best]=0; if(count>=limit) return; }
+  })();
+  return count;
+}
+const DIFFS = [
+  {name:"Easy",   clues:42, mult:1,   par:600},
+  {name:"Medium", clues:34, mult:1.5, par:900},
+  {name:"Hard",   clues:29, mult:2,   par:1200},
+  {name:"Expert", clues:25, mult:3,   par:1500},
+];
+function generate(diff){
+  const solution = new Array(81).fill(0);
+  solveFill(solution);
+  const puzzle = solution.slice();
+  const order = shuffled([...Array(81).keys()]);
+  let clues = 81;
+  for(const i of order){
+    if(clues <= DIFFS[diff].clues) break;
+    const saved = puzzle[i];
+    puzzle[i] = 0;
+    const test = puzzle.slice();
+    if(countSolutions(test,2) !== 1){ puzzle[i] = saved; }
+    else clues--;
+  }
+  return {puzzle, solution};
+}
+
+/* ---------- daily challenge ---------- */
+const DAILY_EPOCH = Date.UTC(2026,0,1);
+function dailyNum(){
+  const d=new Date();
+  return Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-DAILY_EPOCH)/86400000)+1;
+}
+function generateDaily(){
+  const n=dailyNum();
+  RNG = mulberry32((n*2654435761)%2147483647);
+  const gen = generate(1);           // medium-difficulty board, identical for everyone
+  RNG = Math.random;
+  return {gen, num:n};
+}
+
+/* ---------- state ---------- */
+let S = null; // current game state
+let lightPref = store.get("sdk_lightning", false);
+/* ---------- rating: complexity x time x accuracy ---------- */
+function perfPoints(diff,sec,mistakes,won){
+  if(!won) return 0;
+  const T=Math.max(0.4, Math.min(1.5, DIFFS[diff].par/Math.max(sec,60))); // time factor
+  const A=[1,0.85,0.7][mistakes];                                          // accuracy factor
+  return Math.round(1000*DIFFS[diff].mult*T*A);                            // complexity factor
+}
+function playerRating(recs){
+  const perfs=recs.map(r=> r.p!=null ? r.p : perfPoints(r.d,r.sec,r.m,r.w)).filter(p=>p>0)
+                  .sort((a,b)=>b-a).slice(0,5);
+  if(!perfs.length) return {rating:0, provisional:true};
+  return {rating:Math.round(perfs.reduce((a,b)=>a+b,0)/perfs.length), provisional:perfs.length<3};
+}
+function tierOf(r){
+  if(r<700) return "Novice"; if(r<1100) return "Apprentice"; if(r<1500) return "Solver";
+  if(r<1900) return "Expert"; if(r<2400) return "Master"; return "Grandmaster";
+}
+let timerId = null;
+const $ = id => document.getElementById(id);
+const boardEl=$("board"), padEl=$("pad");
+function buzz(p){ if(navigator.vibrate){ try{ navigator.vibrate(p); }catch(e){} } }
+let hints = store.get("sdk_hints", 3);
+function updateHintBtn(){ $("hintCount").textContent=hints; $("hintBtn").classList.toggle("dim", hints<=0); }
+function useHint(){
+  if(!S || S.over || S.paused) return;
+  if(hints<=0){ if(!isPro()) showPaywall("Out of hints. Pro starts you with 10 and adds one every 3 wins."); else showToast("No hints left — solve 3 puzzles to earn one."); return; }
+  const needs = k => !S.puzzle[k] && (S.grid[k]!==S.solution[k] || S.wrong[k]);
+  let i = S.sel;
+  if(i<0 || !needs(i)){
+    const opts=[]; for(let k=0;k<81;k++) if(needs(k)) opts.push(k);
+    if(!opts.length) return;
+    i = opts[rnd(opts.length)];
+  }
+  hints--; store.set("sdk_hints", hints); updateHintBtn();
+  S.notes[i].clear(); S.wrong[i]=false; S.grid[i]=S.solution[i]; S.sel=i; S.paid[i]=1;
+  for(const p of PEERS[i]) S.notes[p].delete(S.grid[i]);
+  buzz(BZ.act);
+  const cell=boardEl.children[i];
+  cell.classList.remove("pop"); void cell.offsetWidth; cell.classList.add("pop");
+  render(); saveGame();
+  if(S.grid.every((v,k)=>v===S.solution[k] && !S.wrong[k])) return win();
+  checkAutoOffer();
+  checkAutoPencil();
+}
+$("hintBtn").addEventListener("pointerdown",e=>{ e.preventDefault(); buzz(BZ.tap); useHint(); });
+
+/* ---------- auto-complete offer ---------- */
+let autoCascade=null;
+function remainingCells(){
+  const out=[];
+  for(let k=0;k<81;k++) if(S.grid[k]!==S.solution[k] || S.wrong[k]) out.push(k);
+  return out;
+}
+function checkAutoOffer(){
+  if(!S || S.over || S.autoDismissed || autoCascade) return;
+  const left=remainingCells().length;
+  if(left>0 && left<=5) $("autoBar").classList.add("show");
+  else $("autoBar").classList.remove("show");
+}
+function hideAutoBar(){ $("autoBar").classList.remove("show"); $("apBar").classList.remove("show"); }
+
+/* ---------- auto-pencil (unlocks at 60% solved) ---------- */
+function noteless(){
+  const b=cleanBoardNow();
+  const out=[];
+  for(let i=0;i<81;i++) if(!b[i] && !(S.grid[i]&&!S.wrong[i]) && S.notes[i].size===0) out.push(i);
+  return out;
+}
+function autoPencilFill(){
+  const b=cleanBoardNow();
+  let n=0;
+  for(const i of noteless()){
+    for(const d of candidates(b,i)) S.notes[i].add(d);
+    n++;
+  }
+  render(); saveGame();
+  showToast("Pencil notes filled for "+n+" cell"+(n===1?"":"s")+". Your own notes were left untouched.");
+}
+function apUnlocked(){
+  const correct=S.grid.filter((v,k)=>v===S.solution[k] && !S.wrong[k]).length;
+  return correct/81>=0.6;
+}
+function checkAutoPencil(){
+  if(!S || S.over || S.apOffered || S.apDismissed) return;
+  if(apUnlocked() && noteless().length>=3 && !$("autoBar").classList.contains("show")){
+    S.apOffered=true;
+    $("apBar").classList.add("show");
+  }
+}
+$("apGo").addEventListener("pointerdown",e=>{ e.preventDefault(); buzz(BZ.act); $("apBar").classList.remove("show"); if(!isPro()){ showPaywall("Auto-pencil is part of Pro."); return; } autoPencilFill(); });
+$("apDismiss").addEventListener("pointerdown",e=>{ e.preventDefault(); buzz(BZ.tap); S.apDismissed=true; $("apBar").classList.remove("show"); showToast("Turn Pencil on anytime to bring this back."); });
+$("autoDismiss").addEventListener("pointerdown",e=>{ e.preventDefault(); buzz(BZ.tap); S.autoDismissed=true; hideAutoBar(); });
+$("autoGo").addEventListener("pointerdown",e=>{
+  e.preventDefault(); buzz(BZ.tap);
+  if(!S || S.over || autoCascade) return;
+  hideAutoBar();
+  if(!isPro()){ showPaywall("Auto-complete is part of Pro."); return; }
+  const cells=remainingCells();
+  let k=0;
+  autoCascade=setInterval(()=>{
+    if(k>=cells.length){
+      clearInterval(autoCascade); autoCascade=null;
+      if(S.grid.every((v,q)=>v===S.solution[q] && !S.wrong[q])) win();
+      return;
+    }
+    const i=cells[k++];
+    S.notes[i].clear(); S.wrong[i]=false; S.grid[i]=S.solution[i]; S.sel=i;
+    if(!S.paid[i]){ S.paid[i]=1; S.score += Math.round(50*DIFFS[S.diff].mult); }
+    $("score").textContent=S.score;
+    const cell=boardEl.children[i];
+    buzz(BZ.tap);
+    cell.classList.remove("pop"); void cell.offsetWidth; cell.classList.add("pop");
+    render();
+  }, 120);
+});
+const BZ={tap:10, act:15, err:180, win:[40,60,40,60,180]};
+
+let profile = store.get("sdk_profile", null);
+let deviceId = store.get("sdk_device", null);
+if(!deviceId){
+  deviceId = (typeof crypto!=="undefined" && crypto.randomUUID) ? crypto.randomUUID() : "d"+Date.now()+"_"+Math.floor(Math.random()*1e9);
+  store.set("sdk_device", deviceId);
+}
+
+/* ---------- confetti ---------- */
+function confetti(){
+  const wrap=document.querySelector(".board-wrap");
+  const cv=document.createElement("canvas");
+  cv.style.cssText="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:40";
+  cv.width=wrap.clientWidth||360; cv.height=wrap.clientHeight||360;
+  wrap.appendChild(cv);
+  const ctx=cv.getContext&&cv.getContext("2d");
+  if(!ctx){ cv.remove(); return; }
+  const css=getComputedStyle(document.documentElement);
+  const cols=[css.getPropertyValue("--gold"),css.getPropertyValue("--err"),"#4A6B4F","#0B5CAD","#7C4DFF"].map(s=>s.trim()||"#B08D3E");
+  const P=[];
+  for(let i=0;i<90;i++) P.push({x:Math.random()*cv.width, y:-10-Math.random()*90, vy:2+Math.random()*3, vx:-1+Math.random()*2, s:3+Math.random()*4, c:cols[i%cols.length], r:Math.random()*6.3});
+  let t=0;
+  const id=setInterval(()=>{
+    t++; ctx.clearRect(0,0,cv.width,cv.height);
+    for(const p of P){ p.x+=p.vx; p.y+=p.vy; p.r+=.1;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c;
+      ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*1.6); ctx.restore(); }
+    if(t>110){ clearInterval(id); cv.remove(); }
+  },16);
+}
+
+/* ---------- entitlement (Pro) ---------- */
+let PRO = store.get("sdk_pro", false);
+const FAMILY_KEY = "fam-7333fcce";
+(function familyUnlock(){
+  try{
+    const k = new URLSearchParams(location.search).get("k");
+    if(k && k === FAMILY_KEY){
+      PRO = true; store.set("sdk_pro", true);
+      if(store.get("sdk_hints",3) < 10) store.set("sdk_hints", 10);
+      history.replaceState(null, "", location.pathname);   // keep the key out of the address bar
+    }
+  }catch(e){}
+})();
+function isPro(){ return !!PRO; }
+function applyPro(){
+  document.body.classList.toggle("pro", isPro());
+  const wn=$("webNote");
+  if(wn) wn.style.display = (!isNativeApp() && !isPro()) ? "" : "none";
+  const chip=$("proChip"); if(chip) chip.style.display = isPro() ? "" : "none";
+}
+function grantPro(){
+  PRO=true; store.set("sdk_pro", true);
+  if(store.get("sdk_hints",3) < 10) { hints = Math.max(hints,10); store.set("sdk_hints",hints); updateHintBtn(); }
+  applyPro(); buildThemeList && buildThemeList();
+  $("proVeil").classList.remove("show");
+  showToast("Pro unlocked. Thank you — enjoy the full game.");
+}
+function showPaywall(reason){
+  $("proWhy").textContent = reason || "Unlock everything. One payment, no ads, no subscription.";
+  if(S && !S.over){ S.paused=true; $("pauseVeil").classList.add("show"); }
+  $("proVeil").classList.add("show");
+}
+$("proClose").addEventListener("click",()=>$("proVeil").classList.remove("show"));
+$("proBuy").addEventListener("click",async()=>{
+  const b=$("proBuy"); b.textContent="Opening Play billing…";
+  try{
+    const ok = await Billing.purchase("sudoku_pro_unlock");
+    if(ok) grantPro(); else b.textContent="Unlock Pro";
+  }catch(e){ b.textContent="Unlock Pro"; showToast("Purchase could not be completed."); }
+});
+$("proRestore").addEventListener("click",async()=>{
+  try{
+    const ok = await Billing.restore();
+    if(ok){ grantPro(); } else showToast("No previous purchase found on this Google account.");
+  }catch(e){ showToast("Could not reach Google Play."); }
+});
+
+/* ---------- native bridges (Capacitor plugins fill these in the APK) ---------- */
+function isNativeApp(){
+  return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+}
+const Billing = {
+  async purchase(sku){
+    if(window.PlayBilling && window.PlayBilling.purchase) return await window.PlayBilling.purchase(sku);
+    if(isNativeApp()){ showToast("Pro isn't on sale yet — coming in the next update."); return false; }
+    const localDev = ["localhost","127.0.0.1","::1"].includes(location.hostname) || location.protocol === "file:";
+    if(localDev) return confirm("[Local build] Simulate a successful purchase for testing?");
+    showToast("Pro is available in the Android app on Google Play.");
+    return false;
+  },
+  async restore(){
+    if(window.PlayBilling && window.PlayBilling.restore) return await window.PlayBilling.restore();
+    if(isNativeApp()) showToast("Pro isn't on sale yet — coming in the next update.");
+    else showToast("Purchases are restored in the Android app on Google Play.");
+    return false;
+  }
+};
+
+/* ---------- version ---------- */
+const APP_VERSION="2.3";
+const CHANGELOG=[
+  ["2.3","Web version. Purchases are handled by Google Play in the Android app."],
+  ["2.2","No advertisements in any version, free or Pro. Pro unlocks Hard, Expert, Zen mode, auto-pencil, auto-complete, three extra themes, unlimited undo and full trends."],
+  ["2.1","Android app build."],
+  ["2.0","Sudoku Pro: a one-time unlock opens Hard, Expert, Zen mode, auto-pencil, auto-complete, three extra themes, unlimited undo and full trends."],
+  ["1.3","A number already proven wrong in a cell can no longer cost you a second mistake. Tapping a red cell clears it in pencil mode too."],
+  ["1.2","Fixed a scoring flaw where undo-and-retype earned points repeatedly. Auto-pencil can be recalled by turning Pencil on."],
+  ["1.1","Auto-pencil at 60%, praise badges, screen stays awake, tap a red cell to clear it."],
+  ["1.0","Daily Challenge, WhatsApp sharing, hints, tutorial, themes, auto-save."],
+];
+function openVersion(){
+  $("verLabel").textContent="v"+APP_VERSION+(isPro()?" Pro":"");
+  $("verGoPro").style.display=isPro()?"none":"";
+  $("verNotes").innerHTML=CHANGELOG.map(c=>"<b>v"+c[0]+"</b>"+c[1]).join("");
+  if(S && !S.over){ S.paused=true; $("pauseVeil").classList.add("show"); }
+  $("verVeil").classList.add("show");
+}
+$("verChip").textContent="v"+APP_VERSION;
+$("verChip").addEventListener("click",openVersion);
+$("proChip").addEventListener("click",()=>showToast("Pro is active on this device. Thank you."));
+$("verClose").addEventListener("click",()=>$("verVeil").classList.remove("show"));
+$("verGoPro").addEventListener("click",()=>{ $("verVeil").classList.remove("show"); showPaywall(); });
+$("verShare").addEventListener("click",()=>{
+  const txt="🧩 Sudoku v"+APP_VERSION+" — ad-free, offline, free.\nDelete any older copy first, then open this file.\n(Scores from older versions may be inflated — the app will offer a clean reset.)";
+  window.open("https://wa.me/?text="+encodeURIComponent(txt),"_blank");
+});
+$("verReset").addEventListener("click",()=>{
+  if(!confirm("Clear all scores, trends, hints and the saved game? Your player name and theme stay.")) return;
+  store.set("sdk_records",[]); store.set("sdk_save",null); store.set("sdk_hints",3);
+  hints=3; updateHintBtn();
+  store.set("sdk_seen_version",APP_VERSION);
+  $("verVeil").classList.remove("show");
+  showToast("Scores cleared. Fresh start on v"+APP_VERSION+".");
+  if($("viewTrends").classList.contains("show")) renderTrends();
+});
+function versionCheck(){
+  const seen=store.get("sdk_seen_version",null);
+  if(seen===APP_VERSION) return;
+  store.set("sdk_seen_version",APP_VERSION);
+  if(seen===null) return;                       // brand-new player, nothing to migrate
+  const recs=store.get("sdk_records",[]);
+  const stale=seen<"1.2" && recs.length>0;      // pre-1.2 scores could be inflated
+  setTimeout(()=>{
+    if(stale && confirm("Updated to v"+APP_VERSION+".\n\nScores earned on your old version may be inflated by a bug that has now been fixed. Clear old scores for a fair leaderboard?\n\nOK = clear   ·   Cancel = keep them")){
+      store.set("sdk_records",[]); store.set("sdk_save",null);
+      showToast("Old scores cleared. You are on v"+APP_VERSION+".");
+    } else {
+      showToast("Updated to v"+APP_VERSION+".");
+    }
+  }, 600);
+}
+
+/* ---------- toast ---------- */
+let toastTimer=null;
+function showToast(msg,ms){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"), ms||2600);
+}
+
+/* ---------- tutorial ---------- */
+const TUT=[
+  {icon:"🧩", title:"The goal", body:"Fill the grid so every row, every column and every 3×3 box contains 1 to 9 exactly once. Tap a cell, then tap a number below to place it."},
+  {icon:"✏️", title:"Pencil", body:"Not sure yet? Turn Pencil on and tap numbers to jot small candidate notes in a cell. Tap again to remove. Turn Pencil off to place real answers."},
+  {icon:"⚡", title:"Lightning", body:"Turn Lightning on, tap a number once to lock it, then just tap cells to place it everywhere. When all nine are placed it jumps to the next number automatically."},
+  {icon:"🔴", title:"Three mistakes only", body:"A wrong entry turns red and lights one of the three dots at the top. Tap the red cell again with the same number to wipe it clean — no extra penalty. The third mistake ends the game."},
+  {icon:"⭐", title:"Daily Challenge", body:"One shared puzzle every day — identical for every player on this app. Solve it, hit Share on WhatsApp, and settle who owns the day."},
+  {icon:"💡", title:"Hints", body:"Stuck? A hint fills the selected cell with the right number (or a random one if nothing is selected). You start with 3 — and earn one more for every 5 puzzles you solve."},
+  {icon:"⏸️", title:"Leave anytime", body:"Your game saves itself. Close the app, catch your train, come back tomorrow — it will be waiting exactly where you left it, timer paused."},
+];
+let tutIdx=0, tutAfter=null;
+function showTutorial(after){
+  tutIdx=0; tutAfter=after||null;
+  renderTut(); $("tutVeil").classList.add("show");
+}
+function renderTut(){
+  const s=TUT[tutIdx];
+  $("tutStep").textContent=(tutIdx+1)+" / "+TUT.length;
+  $("tutIcon").textContent=s.icon;
+  $("tutTitle").textContent=s.title;
+  $("tutBody").textContent=s.body;
+  $("tutNext").textContent = tutIdx===TUT.length-1 ? "Let's play" : "Next";
+}
+function endTut(){
+  $("tutVeil").classList.remove("show");
+  store.set("sdk_tut_done",true);
+  if(tutAfter){ const f=tutAfter; tutAfter=null; f(); }
+}
+$("tutNext").addEventListener("click",()=>{ tutIdx++; if(tutIdx>=TUT.length) endTut(); else renderTut(); });
+$("tutSkip").addEventListener("click",endTut);
+$("helpBtn").addEventListener("click",()=>{ if(S&&!S.over){ S.paused=true; $("pauseVeil").classList.add("show"); } showTutorial(null); });
+
+/* ---------- themes ---------- */
+const THEMES=[
+  {id:"classic", name:"Classic Gold", desc:"Warm and calm", sw:["#FCFAF6","#B08D3E","#22201A"]},
+  {id:"clear",   name:"Clear",        desc:"Big contrast, easy reading", sw:["#FFFFFF","#0B5CAD","#000000"]},
+  {id:"night",   name:"Night",        desc:"Easy on the eyes after dark", sw:["#171612","#D2A94E","#F2EFE7"]},
+  {id:"candy",   name:"Candy",        desc:"Bright and fun for kids", sw:["#FFF6E5","#F26B3A","#3D2B56"]},
+  {id:"forest",  name:"Forest",  pro:1, desc:"Deep green, low glare", sw:["#F2F6EF","#3F6B45","#1E2A20"]},
+  {id:"ocean",   name:"Ocean",   pro:1, desc:"Cool blues, calm focus", sw:["#F1F6FA","#1C6E8C","#12242E"]},
+  {id:"rose",    name:"Rose",    pro:1, desc:"Soft and warm", sw:["#FDF3F3","#A8455C","#2B1A1E"]},
+];
+function applyTheme(id){
+  const t=THEMES.find(x=>x.id===id);
+  if(t && t.pro && !isPro()) id="clear";
+  document.documentElement.setAttribute("data-theme", id);
+  store.set("sdk_theme2", id);
+  document.querySelectorAll(".theme-row").forEach(r=>r.classList.toggle("picked", r.dataset.t===id));
+  if($("viewTrends").classList.contains("show")) renderTrends(); // redraw charts in new colors
+}
+function buildThemeList(){
+  const list=$("themeList"); list.innerHTML="";
+  for(const t of THEMES){
+    const b=document.createElement("button");
+    const locked = t.pro && !isPro();
+    b.className="lvl theme-row"+(locked?" locked":""); b.dataset.t=t.id;
+    b.innerHTML='<span class="tname"><b>'+t.name+(t.pro?'<span class="probadge">PRO</span>':'')+'</b><small>'+t.desc+'</small></span>'+
+      '<span>'+(locked?'<span class="lock">🔒</span>':t.sw.map(c=>'<span class="sw" style="background:'+c+'"></span>').join(""))+'</span>';
+    b.addEventListener("click",()=>{
+      if(locked){ $("themeVeil").classList.remove("show"); showPaywall("Forest, Ocean and Rose are Pro themes."); return; }
+      applyTheme(t.id);
+    });
+    list.appendChild(b);
+  }
+}
+$("themeBtn").addEventListener("click",()=>{ buildThemeList(); applyTheme(document.documentElement.getAttribute("data-theme")||"classic"); $("themeVeil").classList.add("show"); });
+$("themeDone").addEventListener("click",()=>$("themeVeil").classList.remove("show"));
+
+/* ---------- player identity ---------- */
+const ADJ=["Blue","Crimson","Indigo","Golden","Silver","Emerald","Cobalt","Amber","Ivory","Onyx","Scarlet","Teal","Violet","Copper","Jade","Slate","Coral","Saffron","Pearl","Midnight"];
+const NOUN=["Tokai","Falcon","Panther","Lotus","Comet","Harbour","Summit","Willow","Orchid","Raven","Tiger","Heron","Cedar","Nimbus","Ember","Delta","Quartz","Mango","Monsoon","Peak"];
+function suggestNames(n){
+  const out=new Set();
+  while(out.size<n) out.add(ADJ[rnd(ADJ.length)]+" "+NOUN[rnd(NOUN.length)]);
+  return [...out];
+}
+let chosenChip="";
+function fillChips(){
+  chosenChip="";
+  const wrap=$("nameChips"); wrap.innerHTML="";
+  for(const nm of suggestNames(4)){
+    const b=document.createElement("button");
+    b.className="chip"; b.textContent=nm;
+    b.addEventListener("click",()=>{
+      chosenChip=nm; $("nameInput").value="";
+      wrap.querySelectorAll(".chip").forEach(c=>c.classList.toggle("picked",c===b));
+    });
+    wrap.appendChild(b);
+  }
+}
+$("reroll").addEventListener("click",fillChips);
+$("nameInput").addEventListener("input",()=>{
+  chosenChip="";
+  $("nameChips").querySelectorAll(".chip").forEach(c=>c.classList.remove("picked"));
+});
+$("nameSave").addEventListener("click",()=>{
+  const name=($("nameInput").value.trim()||chosenChip).replace(/\s+/g," ").slice(0,20);
+  if(name.length<3) return;
+  profile={name, created:Date.now()};
+  store.set("sdk_profile",profile);
+  $("nameVeil").classList.remove("show");
+  if(!store.get("sdk_tut_done",false)) showTutorial(()=>showLevelPicker());
+  else showLevelPicker();
+});
+
+
+
+function newGame(diff, reuse, dailyN, zen){
+  const gen = reuse || generate(diff);
+  S = {
+    diff, puzzle:gen.puzzle.slice(), solution:gen.solution,
+    grid:gen.puzzle.slice(),
+    notes:Array.from({length:81},()=>new Set()),
+    wrong:new Array(81).fill(false),
+    paid:new Array(81).fill(0),
+    tried:Array.from({length:81},()=>new Set()),
+    sel:-1, pencil:false, lightning:lightPref, lockNum:0, mistakes:0, score:0, sec:0,
+    paused:false, over:false, undo:[],
+    daily: dailyN||null,
+    zen: !!zen,
+    undosUsed:0,
+    src:{puzzle:gen.puzzle.slice(), solution:gen.solution.slice()}
+  };
+  $("lvlLabel").innerHTML = "<b>"+(zen ? "🧘 Zen" : dailyN ? "Daily #"+dailyN : DIFFS[diff].name)+"</b>";
+  $("mistakes").style.visibility = zen ? "hidden" : "";
+  $("timer").style.visibility = zen ? "hidden" : "";
+  $("score").textContent = "0";
+  updateMistakes();
+  buildBoard(); buildPad(); render();
+  setPencil(false);
+  setLightning(lightPref);
+  clearInterval(timerId); S.sec=0; tickLabel();
+  keepAwake();
+  timerId = setInterval(()=>{ if(!S.paused && !S.over){ S.sec++; tickLabel(); if(S.sec%5===0) saveGame(); } },1000);
+  $("pauseVeil").classList.remove("show");
+  if(autoCascade){ clearInterval(autoCascade); autoCascade=null; }
+  hideAutoBar();
+}
+function saveGame(){
+  if(!S || S.over){ store.set("sdk_save", null); return; }
+  store.set("sdk_save", {
+    diff:S.diff, puzzle:S.puzzle, solution:S.solution, grid:S.grid,
+    notes:S.notes.map(n=>[...n]), wrong:S.wrong, paid:S.paid, tried:S.tried.map(t=>[...t]),
+    mistakes:S.mistakes, score:S.score, sec:S.sec, daily:S.daily, zen:S.zen
+  });
+}
+function restoreGame(sv){
+  newGame(sv.diff, {puzzle:sv.puzzle.slice(), solution:sv.solution.slice()}, sv.daily||null, sv.zen||false);
+  S.grid=sv.grid.slice();
+  S.notes=sv.notes.map(a=>new Set(a));
+  S.wrong=sv.wrong.slice();
+  S.paid=(sv.paid||sv.grid.map((v,k)=>(v===sv.solution[k]?1:0))).slice();
+  S.tried=(sv.tried||Array.from({length:81},()=>[])).map(a=>new Set(a));
+  S.mistakes=sv.mistakes; S.score=sv.score; S.sec=sv.sec;
+  $("score").textContent=S.score; updateMistakes(); tickLabel(); render();
+  S.paused=true; $("pauseVeil").classList.add("show");
+}
+function tickLabel(){
+  const m=String(Math.floor(S.sec/60)).padStart(2,"0"), s=String(S.sec%60).padStart(2,"0");
+  $("timer").textContent = m+":"+s;
+}
+function updateMistakes(){
+  const pips=$("mistakes").querySelectorAll(".pip");
+  pips.forEach((p,i)=>p.classList.toggle("hit", i < S.mistakes));
+}
+
+/* ---------- board UI ---------- */
+function buildBoard(){
+  boardEl.innerHTML="";
+  for(let i=0;i<81;i++){
+    const c=document.createElement("div");
+    c.className="cell";
+    if(colOf(i)%3===2 && colOf(i)!==8) c.classList.add("b-r");
+    if(rowOf(i)%3===2 && rowOf(i)!==8) c.classList.add("b-b");
+    c.dataset.i=i;
+    c.addEventListener("pointerdown", ()=>{
+      if(S.over || S.paused) return;
+      buzz(BZ.tap);
+      S.sel=i;
+      if(S.lightning && S.lockNum) input(S.lockNum); else render();
+    });
+    boardEl.appendChild(c);
+  }
+}
+function buildPad(){
+  padEl.innerHTML="";
+  for(let d=1;d<=9;d++){
+    const b=document.createElement("button");
+    b.className="num"; b.dataset.d=d;
+    b.innerHTML="<b>"+d+"</b><small></small>";
+    b.addEventListener("pointerdown",e=>{
+      e.preventDefault();
+      buzz(BZ.tap);
+      if(S.lightning){ toggleLock(d); } else input(d);
+    });
+    padEl.appendChild(b);
+  }
+}
+function render(){
+  if(S.lightning && S.lockNum && countPlaced(S.lockNum)>=9) S.lockNum = nextIncomplete(S.lockNum);
+  const selVal = (S.lightning && S.lockNum) ? S.lockNum : (S.sel>=0 ? S.grid[S.sel] : 0);
+  const cells = boardEl.children;
+  for(let i=0;i<81;i++){
+    const c=cells[i], v=S.grid[i];
+    c.classList.remove("sel","peer","same","given","user","wrong");
+    if(S.puzzle[i]) c.classList.add("given"); else if(v) c.classList.add("user");
+    if(S.wrong[i]) c.classList.add("wrong");
+    const lockMode = S.lightning && S.lockNum;
+    if(lockMode){
+      if(v===selVal) c.classList.add("same");
+    } else if(S.sel>=0){
+      if(i===S.sel) c.classList.add("sel");
+      else if(PEERS[S.sel].includes(i)) c.classList.add("peer");
+      if(selVal && v===selVal && i!==S.sel) c.classList.add("same");
+    }
+    if(v){ c.textContent=v; }
+    else if(S.notes[i].size){
+      if(selVal && S.notes[i].has(selVal)) c.classList.add("same");
+      let h='<div class="notes">';
+      for(let d=1;d<=9;d++){
+        const has=S.notes[i].has(d);
+        h+='<span'+(has&&d===selVal?' class="hit"':'')+'>'+(has?d:"")+"</span>";
+      }
+      c.innerHTML=h+"</div>";
+    } else c.textContent="";
+  }
+  // pad remaining counts
+  const counts=new Array(10).fill(0);
+  for(let i=0;i<81;i++) if(S.grid[i] && !S.wrong[i]) counts[S.grid[i]]++;
+  padEl.querySelectorAll(".num").forEach(b=>{
+    const d=+b.dataset.d, left=9-counts[d];
+    b.querySelector("small").textContent=left;
+    b.classList.toggle("done", left<=0);
+    b.classList.toggle("locked", S.lightning && S.lockNum===+b.dataset.d);
+  });
+}
+
+/* ---------- move grading & praise ---------- */
+function cleanBoardNow(){ return S.grid.map((v,k)=>(v && !S.wrong[k])?v:0); }
+function gradeMove(i,d){
+  const b=cleanBoardNow(); b[i]=0;
+  const cands=candidates(b,i);
+  if(cands.length<=1) return 0;                       // forced cell — routine
+  // hidden single: is i the only home for d in its row, column or box?
+  const units=[[],[],[]];
+  for(let j=0;j<81;j++){
+    if(rowOf(j)===rowOf(i)) units[0].push(j);
+    if(colOf(j)===colOf(i)) units[1].push(j);
+    if(boxOf(j)===boxOf(i)) units[2].push(j);
+  }
+  let hidden=false;
+  for(const u of units){
+    let spots=0;
+    for(const j of u) if(!b[j] && candidates(b,j).includes(d)) spots++;
+    if(spots===1){ hidden=true; break; }
+  }
+  if(hidden) return cands.length>=3 ? 2 : 1;          // cross-hatch / scanning find
+  return cands.length>=4 ? 4 : 3;                     // deep elimination / fish territory
+}
+const PRAISE=["","","","💎 Intelligent!","💥 Genius!!"];
+function praise(i,tier){
+  if(!tier || !PRAISE[tier]) return;
+  const wrap=document.querySelector(".board-wrap");
+  const cell=boardEl.children[i];
+  const el=document.createElement("div");
+  el.className="praise"; el.textContent=PRAISE[tier];
+  try{
+    const wr=wrap.getBoundingClientRect(), cr=cell.getBoundingClientRect();
+    el.style.left=(cr.left-wr.left+cr.width/2)+"px";
+    el.style.top=Math.max(14,(cr.top-wr.top))+"px";
+  }catch(e){ el.style.left="50%"; el.style.top="30%"; }
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(),1000);
+}
+
+/* ---------- input ---------- */
+function pushUndo(i){
+  S.undo.push({i, v:S.grid[i], w:S.wrong[i], n:new Set(S.notes[i]), sc:S.score, pd:S.paid[i], tr:new Set(S.tried[i]),
+    peerNotes: PEERS[i].map(p=>[p,new Set(S.notes[p])])});
+  if(S.undo.length>200) S.undo.shift();
+}
+function input(d){
+  if(S.over||S.paused||S.sel<0) return;
+  const i=S.sel;
+  if(S.puzzle[i]) return;               // can't edit givens
+  if(S.grid[i]===S.solution[i] && !S.wrong[i] && S.grid[i]) return; // locked correct
+  if(S.wrong[i] && S.grid[i]===d){          // tap the same number on a red cell = wipe it
+    S.grid[i]=0; S.wrong[i]=false;
+    render(); saveGame(); return;
+  }
+  if(!S.pencil && S.tried[i].has(d) && d!==S.solution[i]){
+    buzz(BZ.err);                            // already proven wrong here — refuse, don't re-charge
+    const cc=boardEl.children[i]; cc.classList.remove("flash"); void cc.offsetWidth; cc.classList.add("flash");
+    showToast("You already tried "+d+" there — it doesn't fit. No penalty.");
+    return;
+  }
+  pushUndo(i);
+  if(S.pencil){
+    if(S.grid[i]){ S.undo.pop(); return; }
+    if(!S.notes[i].has(d)){
+      const clashes = PEERS[i].filter(p => S.grid[p]===d && !S.wrong[p]);
+      if(clashes.length){
+        S.undo.pop(); buzz(BZ.err);
+        for(const p of clashes){ const cc=boardEl.children[p]; cc.classList.remove("flash"); void cc.offsetWidth; cc.classList.add("flash"); }
+        return;
+      }
+      S.notes[i].add(d);
+    } else S.notes[i].delete(d);
+    render(); return;
+  }
+  const moveTier = (d===S.solution[i]) ? gradeMove(i,d) : 0;
+  S.notes[i].clear();
+  S.grid[i]=d;
+  const cell=boardEl.children[i];
+  if(d===S.solution[i]){
+    S.wrong[i]=false;
+    if(!S.paid[i]){
+      S.paid[i]=1;
+      S.score += Math.round(50*DIFFS[S.diff].mult);
+      praise(i, moveTier);
+    }
+    $("score").textContent=S.score;
+    for(const p of PEERS[i]) S.notes[p].delete(d); // clean pencil marks
+    if(S.lightning && S.lockNum===d && countPlaced(d)>=9) S.lockNum=nextIncomplete(d); // auto-advance
+    buzz(BZ.act);
+    cell.classList.remove("pop"); void cell.offsetWidth; cell.classList.add("pop");
+    if(S.grid.every((v,k)=>v===S.solution[k] && !S.wrong[k])) return win();
+  } else {
+    S.wrong[i]=true;
+    S.tried[i].add(d);
+    S.mistakes++;
+    S.score=Math.max(0,S.score-Math.round(50*DIFFS[S.diff].mult));
+    $("score").textContent=S.score;
+    updateMistakes();
+    buzz(BZ.err);
+    if(!S.zen){
+      if(S.mistakes===1) showToast("Careful — 2 mistakes left. A third ends the game.");
+      else if(S.mistakes===2) showToast("Last chance — one more mistake ends the game.");
+      if(S.mistakes>=3) return lose();
+    }
+  }
+  render();
+  saveGame();
+  checkAutoOffer();
+  checkAutoPencil();
+}
+function doErase(){
+  if(!S||S.over||S.paused||S.sel<0) return;
+  const i=S.sel;
+  if(S.puzzle[i]) return;
+  if(S.grid[i]===S.solution[i] && S.grid[i] && !S.wrong[i]) return;
+  pushUndo(i);
+  S.grid[i]=0; S.wrong[i]=false; S.notes[i].clear(); render();
+  saveGame();
+}
+$("eraseBtn").addEventListener("pointerdown",e=>{ e.preventDefault(); buzz(BZ.tap); doErase(); });
+function doUndo(){
+  if(!S||S.over||S.paused) return;
+  if(!isPro() && (S.undosUsed||0)>=5){ showPaywall("Free games include 5 undos. Pro is unlimited."); return; }
+  S.undosUsed=(S.undosUsed||0)+1;
+  const u=S.undo.pop(); if(!u) return;
+  S.grid[u.i]=u.v; S.wrong[u.i]=u.w; S.notes[u.i]=u.n;
+  for(const [p,n] of u.peerNotes) S.notes[p]=n;
+  if(typeof u.sc==="number"){ S.score=u.sc; $("score").textContent=S.score; }
+  if(typeof u.pd==="number") S.paid[u.i]=u.pd;
+  if(u.tr) S.tried[u.i]=u.tr;
+  render();
+  saveGame();
+}
+$("undoBtn").addEventListener("pointerdown",e=>{ e.preventDefault(); buzz(BZ.tap); doUndo(); });
+function setPencil(on){
+  S.pencil=on;
+  $("pencilBtn").classList.toggle("on",on);
+  $("pencilState").textContent=on?"on":"off";
+  if(on && S && !S.over && apUnlocked() && noteless().length>=1){
+    S.apOffered=true;
+    $("apBar").classList.add("show");
+  }
+}
+$("pencilBtn").addEventListener("pointerdown",e=>{ e.preventDefault(); buzz(BZ.tap); if(S) setPencil(!S.pencil); });
+function setLightning(on){
+  S.lightning=on; lightPref=on;
+  if(!on) S.lockNum=0;
+  $("lightBtn").classList.toggle("on",on);
+  $("lightState").textContent=on?"on":"off";
+  store.set("sdk_lightning",on);
+  render();
+}
+function countPlaced(d){ return S.grid.filter((v,i)=>v===d && !S.wrong[i]).length; }
+function nextIncomplete(from){
+  for(let k=1;k<=9;k++){ const d=((from-1+k)%9)+1; if(countPlaced(d)<9) return d; }
+  return 0;
+}
+function toggleLock(d){
+  if(countPlaced(d)>=9) return;
+  S.lockNum = (S.lockNum===d) ? 0 : d;
+  S.sel = -1;
+  render();
+}
+$("lightBtn").addEventListener("pointerdown",e=>{ e.preventDefault(); buzz(BZ.tap); if(S) setLightning(!S.lightning); });
+
+document.addEventListener("keydown",e=>{
+  if(!S||S.over) return;
+  if(e.key>="1"&&e.key<="9"){ if(S.lightning) toggleLock(+e.key); else input(+e.key); }
+  else if(e.key==="Backspace"||e.key==="Delete") doErase();
+  else if(e.key==="p"||e.key==="P") setPencil(!S.pencil);
+  else if(e.key==="l"||e.key==="L") setLightning(!S.lightning);
+  else if(e.key==="z"&&(e.ctrlKey||e.metaKey)) doUndo();
+  else if(e.key.startsWith("Arrow") && S.sel>=0){
+    let r=rowOf(S.sel), c=colOf(S.sel);
+    if(e.key==="ArrowUp")r=Math.max(0,r-1); if(e.key==="ArrowDown")r=Math.min(8,r+1);
+    if(e.key==="ArrowLeft")c=Math.max(0,c-1); if(e.key==="ArrowRight")c=Math.min(8,c+1);
+    S.sel=r*9+c; render(); e.preventDefault();
+  }
+});
+
+/* ---------- screen wake lock ---------- */
+let wakeLock=null;
+async function keepAwake(){
+  try{
+    if(navigator.wakeLock && !wakeLock){
+      wakeLock=await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release",()=>{ wakeLock=null; });
+    }
+  }catch(e){ wakeLock=null; }
+}
+function releaseWake(){ try{ if(wakeLock){ wakeLock.release(); wakeLock=null; } }catch(e){} }
+
+/* ---------- pause ---------- */
+$("pauseBtn").addEventListener("click",()=>{ if(!S||S.over) return; S.paused=true; $("pauseVeil").classList.add("show"); releaseWake(); });
+$("resumeBtn").addEventListener("click",()=>{ S.paused=false; $("pauseVeil").classList.remove("show"); keepAwake(); });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden&&S&&!S.over){ S.paused=true; $("pauseVeil").classList.add("show"); saveGame(); } });
+window.addEventListener("pagehide", saveGame);
+
+/* ---------- win / lose ---------- */
+function fmt(sec){ return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0"); }
+function shareLine(won){
+  const head = S.daily ? "⭐ Sudoku Daily #"+S.daily : "🧩 Sudoku · "+DIFFS[S.diff].name;
+  const who = profile ? profile.name : "Player";
+  return won
+    ? head+" — "+who+"\nSolved in "+fmt(S.sec)+" · "+S.mistakes+" mistake"+(S.mistakes===1?"":"s")+" · Score "+S.score+"\nBeat that 😎"
+    : head+" — "+who+"\nThree strikes at "+fmt(S.sec)+" · Score "+S.score+"\nThis one bites.";
+}
+$("waShare").addEventListener("click",()=>{
+  if(!S) return;
+  window.open("https://wa.me/?text="+encodeURIComponent(S.shareTxt||shareLine(S.over)), "_blank");
+});
+function win(){
+  S.over=true; clearInterval(timerId); store.set("sdk_save",null); hideAutoBar(); releaseWake();
+  buzz(BZ.win);
+  confetti();
+  const D=DIFFS[S.diff];
+  const timeBonus=Math.round(Math.max(0, D.par - S.sec) * D.mult);
+  const cleanBonus=S.mistakes===0 ? Math.round(300*D.mult) : 0;
+  S.score += timeBonus + cleanBonus;
+  saveRecord(true);
+  const totalWins = store.get("sdk_records",[]).filter(r=>r.w).length;
+  let earnedNote="";
+  const every = isPro() ? 3 : 5;
+  if(totalWins>0 && totalWins%every===0){
+    hints++; store.set("sdk_hints",hints); updateHintBtn();
+    earnedNote="<br>💡 Hint earned — "+totalWins+" puzzles solved! You now have "+hints+".";
+  }
+  $("endTitle").textContent="Solved";
+  $("endScore").textContent=S.score;
+  $("endDetail").innerHTML =
+    D.name+" · "+fmt(S.sec)+" · "+S.mistakes+" mistake"+(S.mistakes===1?"":"s")+"<br>"+
+    "Time bonus +"+timeBonus+(cleanBonus?" · Flawless +"+cleanBonus:"")+earnedNote;
+  S.shareTxt=shareLine(true);
+  setTimeout(()=>$("endVeil").classList.add("show"), 1200);
+  render();
+}
+function lose(){
+  S.over=true; clearInterval(timerId); store.set("sdk_save",null); hideAutoBar(); releaseWake();
+  saveRecord(false);
+  $("endTitle").textContent="Three mistakes";
+  $("endScore").textContent=S.score;
+  $("endDetail").textContent=(S.daily?"Daily #"+S.daily:DIFFS[S.diff].name)+" · "+fmt(S.sec)+" · that puzzle is closed. Start a new one.";
+  S.shareTxt=shareLine(false);
+  $("endVeil").classList.add("show");
+  render();
+}
+$("endNew").addEventListener("click",()=>{ $("endVeil").classList.remove("show"); showLevelPicker(); });
+$("endClose").addEventListener("click",()=>$("endVeil").classList.remove("show"));
+
+
+/* ---------- leaderboard sync ---------- */
+function lbHeaders(){ return {apikey:LB.key, Authorization:"Bearer "+LB.key, "Content-Type":"application/json"}; }
+async function pushStats(){
+  if(!lbOn() || !profile) return;
+  const recs=store.get("sdk_records",[]);
+  const {rating}=playerRating(recs);
+  const body={ id:deviceId, name:profile.name, rating:rating||0,
+    games:recs.length, wins:recs.filter(r=>r.w).length,
+    best_score:recs.length?Math.max(...recs.map(r=>r.sc)):0,
+    updated_at:new Date().toISOString() };
+  try{
+    await fetch(LB.url+"/rest/v1/"+LB_TABLE, {
+      method:"POST",
+      headers:Object.assign(lbHeaders(),{Prefer:"resolution=merge-duplicates"}),
+      body:JSON.stringify(body)
+    });
+  }catch(e){ /* offline is fine — next win syncs */ }
+}
+async function fetchBoard(){
+  if(!lbOn()) return null;
+  try{
+    const r=await fetch(LB.url+"/rest/v1/"+LB_TABLE+"?select=*&order=rating.desc&limit=50",{headers:lbHeaders()});
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(e){ return null; }
+}
+function boardDigest(rows){
+  const medals=["🥇","🥈","🥉"];
+  const today=new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+  let txt="🏆 Sudoku Leaderboard — "+today+"\n";
+  rows.slice(0,10).forEach((p,i)=>{
+    txt+=(medals[i]||(i+1)+".")+" "+p.name+" — "+p.rating+" ("+p.wins+"/"+p.games+")\n";
+  });
+  return txt.trim();
+}
+async function renderLeaderboard(){
+  const el=$("lbBody"); if(!el) return;
+  const rows=await fetchBoard();
+  if(!rows){ el.innerHTML='<div class="lb-status">Couldn\'t reach the leaderboard — check your connection.</div>'; return; }
+  if(!rows.length){ el.innerHTML='<div class="lb-status">No players yet. Win a game to appear here.</div>'; return; }
+  let h='<table class="lb-table">';
+  const medals=["🥇","🥈","🥉"];
+  rows.forEach((p,i)=>{
+    h+='<tr class="'+(p.id===deviceId?"me":"")+'"><td>'+(medals[i]||i+1)+'</td><td class="nm">'+String(p.name).slice(0,20)+'</td><td>'+p.rating+'</td><td>'+p.wins+'/'+p.games+'</td></tr>';
+  });
+  el.innerHTML=h+'</table>';
+  const cb=$("lbCopy");
+  if(cb) cb.onclick=async()=>{
+    const txt=boardDigest(rows);
+    try{
+      if(navigator.share){ await navigator.share({text:txt}); }
+      else{ await navigator.clipboard.writeText(txt); cb.textContent="Copied — paste in the group"; setTimeout(()=>cb.textContent="Copy board for WhatsApp",2500); }
+    }catch(e){}
+  };
+}
+
+/* ---------- records & trends ---------- */
+function saveRecord(won){
+  const recs=store.get("sdk_records",[]);
+  if(S.zen) return;
+  recs.push({t:Date.now(), d:S.diff, sec:S.sec, m:S.mistakes, sc:S.score, w:won?1:0, p:perfPoints(S.diff,S.sec,S.mistakes,won), dl:S.daily||0});
+  if(recs.length>500) recs.splice(0, recs.length-500);
+  store.set("sdk_records",recs);
+  pushStats();
+}
+function renderTrends(){
+  const recs=store.get("sdk_records",[]);
+  const body=$("trendsBody");
+  const {rating,provisional}=playerRating(recs);
+  const pname=profile?profile.name:"Player";
+  const tier=rating?tierOf(rating):"Unranked";
+  const rankCard=
+    '<div class="rank-card">'+
+      '<div class="pname">'+pname+'</div>'+
+      '<div class="tier">'+tier+(provisional&&rating?' · provisional':'')+'</div>'+
+      '<div class="rating">'+(rating||'—')+'</div>'+
+      '<div class="sub">Rating = complexity × time × accuracy, best 5 solves</div>'+
+      '<button class="btn" id="shareRank">Share my rank</button>'+
+      (lbOn()
+        ? '<div class="rating-note">Your pseudonym and rating sync to the shared leaderboard below.</div>'
+        : '<div class="rating-note">Ratings live on each player\'s device. Share your card in the group and settle it there.</div>')+
+    '</div>'+
+    (lbOn()
+      ? '<div class="chart-card"><h3>🏆 Leaderboard — everyone on this app</h3><div id="lbBody"><div class="lb-status">Loading…</div></div>'+
+        '<button class="btn ghost" id="lbCopy" style="width:100%">Copy board for WhatsApp</button></div>'
+      : '');
+  if(!recs.length){
+    body.innerHTML=rankCard+'<div class="empty-note">No games finished yet.<br>Your scores, times and streaks will build up here.</div>';
+    wireShare(recs,rating,tier);
+    renderLeaderboard();
+    return;
+  }
+  const wins=recs.filter(r=>r.w);
+  const winRate=Math.round(100*wins.length/recs.length);
+  let streak=0; for(let i=recs.length-1;i>=0;i--){ if(recs[i].w) streak++; else break; }
+  let bestStreak=0,cur=0; for(const r of recs){ cur=r.w?cur+1:0; bestStreak=Math.max(bestStreak,cur); }
+  const bestScore=Math.max(...recs.map(r=>r.sc));
+  const avgM=(recs.reduce((a,r)=>a+r.m,0)/recs.length).toFixed(1);
+
+  let rows="";
+  for(let d=0;d<4;d++){
+    const g=recs.filter(r=>r.d===d), gw=g.filter(r=>r.w);
+    if(!g.length) continue;
+    const best=gw.length?fmt(Math.min(...gw.map(r=>r.sec))):"—";
+    const avg=gw.length?fmt(Math.round(gw.reduce((a,r)=>a+r.sec,0)/gw.length)):"—";
+    rows+="<tr><td>"+DIFFS[d].name+"</td><td>"+g.length+"</td><td>"+best+"</td><td>"+avg+"</td><td>"+Math.round(100*gw.length/g.length)+"%</td></tr>";
+  }
+  body.innerHTML =
+    '<div class="trend-grid">'+
+      '<div class="tcard"><small>Games played</small><b>'+recs.length+'</b> <span>'+winRate+'% solved</span></div>'+
+      '<div class="tcard"><small>Best score</small><b>'+bestScore+'</b></div>'+
+      '<div class="tcard"><small>Win streak</small><b>'+streak+'</b> <span>best '+bestStreak+'</span></div>'+
+      '<div class="tcard"><small>Avg mistakes</small><b>'+avgM+'</b> <span>per game</span></div>'+
+    '</div>'+
+    (isPro()
+      ? '<div class="chart-card"><h3>Score trend — last 20 games</h3><canvas id="chScore" width="640" height="220"></canvas></div>'+
+        '<div class="chart-card"><h3>Solve time trend (wins)</h3><canvas id="chTime" width="640" height="220"></canvas></div>'+
+        '<div class="chart-card"><h3>By level</h3><table class="diff-table"><tr><th>Level</th><th>Games</th><th>Best</th><th>Avg</th><th>Solved</th></tr>'+rows+'</table></div>'
+      : '<div class="chart-card"><h3>Trends &amp; charts</h3><div class="lb-status">Score and solve-time charts, plus your per-level breakdown, are part of Pro.</div><button class="btn" id="trendPro" style="width:100%">See Pro</button></div>');
+  body.innerHTML = rankCard + body.innerHTML;
+  wireShare(recs,rating,tier);
+  const tp=$("trendPro"); if(tp) tp.onclick=()=>showPaywall("Full trends and charts are part of Pro.");
+  renderLeaderboard();
+
+  drawLine($("chScore"), recs.slice(-20).map(r=>r.sc), recs.slice(-20).map(r=>r.w), v=>v);
+  const winRecs=recs.filter(r=>r.w).slice(-20);
+  drawLine($("chTime"), winRecs.map(r=>r.sec), winRecs.map(()=>1), fmtAxisTime, true);
+}
+function wireShare(recs,rating,tier){
+  const b=$("shareRank"); if(!b) return;
+  b.addEventListener("click",async()=>{
+    const wins=recs.filter(r=>r.w).length;
+    const best=recs.length?Math.max(...recs.map(r=>r.sc)):0;
+    const txt="🧩 Sudoku — "+(profile?profile.name:"Player")+"\n"+
+      "Rank: "+tier+" · Rating "+(rating||0)+"\n"+
+      "Solved "+wins+"/"+recs.length+" · Best score "+best;
+    window.open("https://wa.me/?text="+encodeURIComponent(txt), "_blank");
+  });
+}
+function fmtAxisTime(v){ return Math.round(v/60)+"m"; }
+function drawLine(cv, data, wonFlags, fmtV, lowerBetter){
+  if(!cv||!data.length) { const x=cv&&cv.getContext&&cv.getContext("2d"); if(x){ x.font="13px Inter"; x.fillStyle="#8A8578"; x.fillText("Not enough data yet",20,40);} return; }
+  const ctx=cv.getContext&&cv.getContext("2d"); if(!ctx) return;
+  const css=getComputedStyle(document.documentElement);
+  const cLine=(css.getPropertyValue("--line")||"#E4DECF").trim();
+  const cGold=(css.getPropertyValue("--gold")||"#B08D3E").trim();
+  const cErr=(css.getPropertyValue("--err")||"#A63D2F").trim();
+  const cMuted=(css.getPropertyValue("--muted")||"#8A8578").trim();
+  const W=cv.width, H=cv.height, P=30;
+  ctx.clearRect(0,0,W,H);
+  const min=Math.min(...data), max=Math.max(...data), span=(max-min)||1;
+  const x=i=>P+(W-2*P)*(data.length===1?0.5:i/(data.length-1));
+  const y=v=>H-P-(H-2*P)*((v-min)/span);
+  // grid lines
+  ctx.strokeStyle=cLine; ctx.lineWidth=1;
+  for(let g=0;g<4;g++){ const gy=P+(H-2*P)*g/3; ctx.beginPath(); ctx.moveTo(P,gy); ctx.lineTo(W-P,gy); ctx.stroke(); }
+  // trend line
+  ctx.strokeStyle=cGold; ctx.lineWidth=2.5; ctx.beginPath();
+  data.forEach((v,i)=>{ i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)); });
+  ctx.stroke();
+  // points
+  data.forEach((v,i)=>{
+    ctx.beginPath(); ctx.arc(x(i),y(v),4,0,7);
+    ctx.fillStyle = wonFlags[i] ? cGold : cErr;
+    ctx.fill();
+  });
+  // min / max labels
+  ctx.font="11px JetBrains Mono, monospace"; ctx.fillStyle=cMuted;
+  ctx.fillText(fmtV(max), 4, y(max)+4);
+  ctx.fillText(fmtV(min), 4, y(min)+4);
+}
+
+/* ---------- tabs & level picker ---------- */
+$("tabPlay").addEventListener("click",()=>switchTab(true));
+$("tabTrends").addEventListener("click",()=>switchTab(false));
+function switchTab(play){
+  $("tabPlay").classList.toggle("active",play);
+  $("tabTrends").classList.toggle("active",!play);
+  $("viewPlay").classList.toggle("show",play);
+  $("viewTrends").classList.toggle("show",!play);
+  if(!play){ if(S&&!S.over){S.paused=true;$("pauseVeil").classList.add("show");} renderTrends(); }
+}
+function showLevelPicker(){
+  document.querySelectorAll('.lvl[data-d]').forEach(b=>{
+    const d=+b.dataset.d, locked = d>=2 && !isPro();
+    b.classList.toggle("locked",locked);
+    const s=b.querySelector("small");
+    if(locked && !s.dataset.orig){ s.dataset.orig=s.textContent; }
+    if(locked){ s.innerHTML='🔒 Pro'; } else if(s.dataset.orig){ s.textContent=s.dataset.orig; }
+  });
+  const zb=$("zenBtn"), zs=zb.querySelector("small");
+  zb.classList.toggle("locked", !isPro());
+  zs.textContent = isPro() ? "no mistake limit, no timer" : "🔒 Pro";
+  const nn=dailyNum();
+  $("dailyNumLbl").textContent=nn;
+  const done=store.get("sdk_records",[]).some(r=>r.dl===nn && r.w);
+  $("dailyState").textContent = done ? "✓ solved — play again anytime" : "same puzzle for everyone today";
+  $("lvlVeil").classList.add("show");
+}
+$("dailyBtn").addEventListener("click",()=>{
+  $("lvlVeil").classList.remove("show");
+  $("lvlCancel").style.display="";
+  switchTab(true);
+  const {gen,num}=generateDaily();
+  newGame(1, {puzzle:gen.puzzle.slice(), solution:gen.solution.slice()}, num);
+  saveGame();
+});
+$("newBtn").addEventListener("pointerdown",e=>{ e.preventDefault(); buzz(BZ.tap); if(S){S.paused=true;} showLevelPicker(); });
+$("lvlCancel").addEventListener("click",()=>{ if(!S) return; $("lvlVeil").classList.remove("show"); S.paused=false; });
+$("zenBtn").addEventListener("click",()=>{
+  if(!isPro()){ $("lvlVeil").classList.remove("show"); showPaywall("Zen mode is part of Pro."); return; }
+  $("lvlVeil").classList.remove("show");
+  $("lvlCancel").style.display="";
+  switchTab(true);
+  newGame(1,null,null,true);
+  saveGame();
+});
+document.querySelectorAll(".lvl[data-d]").forEach(b=>b.addEventListener("click",()=>{
+  if(+b.dataset.d>=2 && !isPro()){ $("lvlVeil").classList.remove("show"); showPaywall("Hard and Expert levels are part of Pro."); return; }
+  $("lvlVeil").classList.remove("show");
+  $("lvlCancel").style.display="";
+  switchTab(true);
+  newGame(+b.dataset.d);
+  saveGame();
+}));
+// resume timer if picker cancelled mid-game handled by resume button flow
+
+/* ---------- boot ---------- */
+$("footNote").textContent="v"+APP_VERSION+" · No ads, ever. No tracking. Your stats stay on this device.";
+applyPro();
+applyTheme(store.get("sdk_theme2","clear"));
+versionCheck();
+updateHintBtn();
+$("lvlCancel").style.display="none";
+const savedGame=store.get("sdk_save",null);
+if(!profile){ fillChips(); $("nameVeil").classList.add("show"); }
+else if(savedGame && savedGame.grid){
+  restoreGame(savedGame);
+  $("lvlCancel").style.display="";
+}
+else if(!store.get("sdk_tut_done",false)){ showTutorial(()=>showLevelPicker()); }
+else { showLevelPicker(); }
+
+</script>
+</body>
+</html>
