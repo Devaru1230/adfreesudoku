@@ -279,6 +279,13 @@ canvas{width:100%;height:auto;display:block}
 .tr-pad button.off{opacity:.25}
 .tr-wait{text-align:center;color:var(--muted);font-size:13px;padding:30px 0}
 @media (prefers-reduced-motion: reduce){.tr-board .cell{transition:none}}
+
+/* ---------- group ranking ---------- */
+.grp-acts{display:flex;gap:8px} .grp-acts .btn{flex:1;padding:10px 6px}
+.grp-x{border:0;background:none;color:var(--muted);font-size:14px;min-width:34px;min-height:34px;cursor:pointer}
+.lb-table small{color:var(--muted);font-size:10px}
+#grpText{width:100%;border:1px solid var(--ink);background:var(--cellbg);color:var(--ink);border-radius:var(--radius);padding:8px;font-family:'JetBrains Mono',monospace;font-size:11px;resize:none}
+.grp-row{display:flex;gap:8px} .grp-row .btn{flex:1}
 </style>
 </head>
 <body>
@@ -370,6 +377,18 @@ canvas{width:100%;height:auto;display:block}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Group ranking: paste friends' codes -->
+<div class="veil" id="grpVeil">
+  <div class="card">
+    <h2>Add friends' codes</h2>
+    <p>Paste a WhatsApp message that has a code in it. You can paste several messages at once.</p>
+    <textarea id="grpText" rows="5" aria-label="Friends' codes"></textarea>
+    <div class="rating-note" id="grpMsg"></div>
+    <div class="grp-row"><button class="btn ghost" id="grpPaste">Paste</button><button class="btn" id="grpGo">Add</button></div>
+    <button class="btn ghost" id="grpCancel" style="width:100%">Cancel</button>
+  </div>
+</div>
 
 <!-- Training: learn the moves -->
 <div class="train" id="trainView"><div class="tw" id="trainBody"></div></div>
@@ -480,6 +499,7 @@ canvas{width:100%;height:auto;display:block}
 const LB = { url: "", key: "" };
 const LB_TABLE = "sudoku_players";
 function lbOn(){ return !!(LB.url && LB.key); }
+function lbJoined(){ return !!store.get("sdk_lb_join", false); }
 
 const store = (() => {
   let mem = {};
@@ -790,8 +810,9 @@ const Billing = {
 };
 
 /* ---------- version ---------- */
-const APP_VERSION="2.6";
+const APP_VERSION="2.7";
 const CHANGELOG=[
+  ["2.7","Your group: every shared result now carries a code. Paste friends' messages in Trends to rank your group and see who solved today's Daily fastest. Nothing is sent anywhere."],
   ["2.6","Learn the moves: lessons that shade the rows, columns and boxes behind each answer, from sure shots to calculated guesses. The first four lessons are free."],
   ["2.5","More recognition for good play, and a flourish when you finish a row, column or box. The strongest words are saved for the hardest deductions."],
   ["2.4","Restart the same puzzle from the pause screen or New game. Fonts are now built into the app, so the look no longer changes when you are offline."],
@@ -1371,8 +1392,8 @@ function shareLine(won){
   const head = S.daily ? "⭐ Sudoku Daily #"+S.daily : "🧩 Sudoku · "+DIFFS[S.diff].name;
   const who = profile ? profile.name : "Player";
   return won
-    ? head+" — "+who+"\nSolved in "+fmt(S.sec)+" · "+S.mistakes+" mistake"+(S.mistakes===1?"":"s")+" · Score "+S.score+"\nBeat that 😎"
-    : head+" — "+who+"\nThree strikes at "+fmt(S.sec)+" · Score "+S.score+"\nThis one bites.";
+    ? head+" — "+who+"\nSolved in "+fmt(S.sec)+" · "+S.mistakes+" mistake"+(S.mistakes===1?"":"s")+" · Score "+S.score+"\nBeat that 😎"+grpFoot()
+    : head+" — "+who+"\nThree strikes at "+fmt(S.sec)+" · Score "+S.score+"\nThis one bites."+grpFoot();
 }
 $("waShare").addEventListener("click",()=>{
   if(!S) return;
@@ -1420,7 +1441,7 @@ $("endClose").addEventListener("click",()=>$("endVeil").classList.remove("show")
 /* ---------- leaderboard sync ---------- */
 function lbHeaders(){ return {apikey:LB.key, Authorization:"Bearer "+LB.key, "Content-Type":"application/json"}; }
 async function pushStats(){
-  if(!lbOn() || !profile) return;
+  if(!lbOn() || !profile || !lbJoined()) return;
   const recs=store.get("sdk_records",[]);
   const {rating}=playerRating(recs);
   const body={ id:deviceId, name:profile.name, rating:rating||0,
@@ -1436,7 +1457,7 @@ async function pushStats(){
   }catch(e){ /* offline is fine — next win syncs */ }
 }
 async function fetchBoard(){
-  if(!lbOn()) return null;
+  if(!lbOn() || !lbJoined()) return null;
   try{
     const r=await fetch(LB.url+"/rest/v1/"+LB_TABLE+"?select=*&order=rating.desc&limit=50",{headers:lbHeaders()});
     if(!r.ok) return null;
@@ -1495,18 +1516,20 @@ function renderTrends(){
       '<div class="rating">'+(rating||'—')+'</div>'+
       '<div class="sub">Rating = complexity × time × accuracy, best 5 solves</div>'+
       '<button class="btn" id="shareRank">Share my rank</button>'+
-      (lbOn()
-        ? '<div class="rating-note">Your pseudonym and rating sync to the shared leaderboard below.</div>'
-        : '<div class="rating-note">Ratings live on each player\'s device. Share your card in the group and settle it there.</div>')+
+      (lbOn() && lbJoined()
+        ? '<div class="rating-note">You are on the global leaderboard: your player name, rating, games and wins are sent to it. <a href="#" id="lbLeave">Leave</a></div>'
+        : lbOn()
+        ? '<button class="btn ghost" id="lbJoin">Join the global leaderboard</button><div class="rating-note">Joining sends your player name, rating, games and wins to the leaderboard server. Nothing else. Until you join, nothing is sent.</div>'
+        : '<div class="rating-note">Ratings live on each player\'s device. Add friends\' codes below to rank your group.</div>')+
     '</div>'+
-    (lbOn()
+    (lbOn() && lbJoined()
       ? '<div class="chart-card"><h3>🏆 Leaderboard — everyone on this app</h3><div id="lbBody"><div class="lb-status">Loading…</div></div>'+
         '<button class="btn ghost" id="lbCopy" style="width:100%">Copy board for WhatsApp</button></div>'
       : '');
   if(!recs.length){
     body.innerHTML=rankCard+'<div class="empty-note">No games finished yet.<br>Your scores, times and streaks will build up here.</div>';
     wireShare(recs,rating,tier);
-    renderLeaderboard();
+    renderLeaderboard(); grpRender();
     return;
   }
   const wins=recs.filter(r=>r.w);
@@ -1539,20 +1562,22 @@ function renderTrends(){
   body.innerHTML = rankCard + body.innerHTML;
   wireShare(recs,rating,tier);
   const tp=$("trendPro"); if(tp) tp.onclick=()=>showPaywall("Full trends and charts are part of Pro.");
-  renderLeaderboard();
+  renderLeaderboard(); grpRender();
 
   drawLine($("chScore"), recs.slice(-20).map(r=>r.sc), recs.slice(-20).map(r=>r.w), v=>v);
   const winRecs=recs.filter(r=>r.w).slice(-20);
   drawLine($("chTime"), winRecs.map(r=>r.sec), winRecs.map(()=>1), fmtAxisTime, true);
 }
 function wireShare(recs,rating,tier){
+  const j=$("lbJoin"); if(j) j.onclick=()=>{ if(!confirm("Join the global leaderboard?\n\nYour player name, rating, games and wins will be sent to the leaderboard server. Nothing else is sent.")) return; store.set("sdk_lb_join",true); pushStats(); renderTrends(); };
+  const lv=$("lbLeave"); if(lv) lv.onclick=e=>{ e.preventDefault(); store.set("sdk_lb_join",false); showToast("You have left. Nothing more will be sent."); renderTrends(); };
   const b=$("shareRank"); if(!b) return;
   b.addEventListener("click",async()=>{
     const wins=recs.filter(r=>r.w).length;
     const best=recs.length?Math.max(...recs.map(r=>r.sc)):0;
     const txt="🧩 Sudoku — "+(profile?profile.name:"Player")+"\n"+
       "Rank: "+tier+" · Rating "+(rating||0)+"\n"+
-      "Solved "+wins+"/"+recs.length+" · Best score "+best;
+      "Solved "+wins+"/"+recs.length+" · Best score "+best+grpFoot();
     window.open("https://wa.me/?text="+encodeURIComponent(txt), "_blank");
   });
 }
@@ -1933,6 +1958,86 @@ function trTry(d){
   if(d!==right && dead>=0) trSet(dead,"bad");
 }
 $("trainBtn").addEventListener("click", trOpen);
+
+
+/* ---------- group ranking: share codes, no server ----------
+   Every shared result carries a short code. Friends paste the WhatsApp message into "Your group"
+   and their phone builds a ranked table. Codes are kept only on this phone. */
+const GRP_EPOCH = Date.UTC(2026,0,1);
+function grpHash(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36).slice(-4); }
+function grpB64(s){ return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function grpUnB64(s){ s=s.replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4) s+="="; return decodeURIComponent(escape(atob(s))); }
+function grpToday(){ const d=new Date(); return Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-GRP_EPOCH)/86400000); }
+function grpMine(){
+  const recs=store.get("sdk_records",[]), {rating}=playerRating(recs);
+  const dailies=recs.filter(r=>r.dl&&r.w), last=dailies.length?dailies.reduce((a,b)=>b.dl>a.dl||(b.dl===a.dl&&b.sec<a.sec)?b:a):null;
+  return {id:grpHash(deviceId+"#id"), name:(profile?profile.name:"Player").slice(0,24), rating:rating||0, wins:recs.filter(r=>r.w).length, games:recs.length,
+    best:recs.length?Math.max(...recs.map(r=>r.sc)):0, dl:last?last.dl:0, dsec:last?last.sec:0, dm:last?last.m:0, day:grpToday()};
+}
+function grpCode(p){
+  p=p||grpMine();
+  const body=[grpB64(p.name), p.rating, p.wins, p.games, p.best, p.dl, p.dsec, p.dm, p.day].map(x=>typeof x==="number"?x.toString(36):x).join(".")+"."+p.id;
+  return "SDK1."+body+"."+grpHash(body);
+}
+/* find every valid code in any pasted text; a typo or a changed number fails the check and is skipped */
+function grpParse(text){
+  const out=[], re=/SDK1\.([A-Za-z0-9_-]{1,48})((?:\.[0-9a-z]{1,9}){8})\.([0-9a-z]{1,4})\.([0-9a-z]{1,4})/g; let m;
+  while((m=re.exec(text||""))){
+    const body=m[1]+m[2]+"."+m[3]; if(grpHash(body)!==m[4]) continue;
+    const n=m[2].slice(1).split(".").map(x=>parseInt(x,36)); let name;
+    try{ name=grpUnB64(m[1]); }catch(e){ continue; }
+    out.push({id:m[3], name:name.slice(0,24), rating:n[0], wins:n[1], games:n[2], best:n[3], dl:n[4], dsec:n[5], dm:n[6], day:n[7]});
+  }
+  return out;
+}
+function grpAdd(text){
+  const found=grpParse(text), g=store.get("sdk_group",{}), me=grpMine().id; let added=0;
+  for(const p of found){ if(p.id===me) continue; const old=g[p.id];
+    if(!old || p.day>old.day || (p.day===old.day && p.games>=old.games)){ g[p.id]=p; added++; } }
+  store.set("sdk_group",g); return {found:found.length, added};
+}
+function grpTables(){
+  const me=grpMine(), all=[me].concat(Object.values(store.get("sdk_group",{})).filter(p=>p.id!==me.id));
+  const byRating=all.slice().sort((a,b)=>b.rating-a.rating || b.wins-a.wins || a.name.localeCompare(b.name));
+  const today=dailyNum(), daily=all.filter(p=>p.dl===today && p.dsec>0).sort((a,b)=>a.dsec-b.dsec || a.dm-b.dm || a.name.localeCompare(b.name));
+  return {me, byRating, daily, today};
+}
+function grpDigest(){
+  const {byRating, daily, today}=grpTables(), medals=["🥇","🥈","🥉"], dt=new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+  let t="🏆 Sudoku · our group · "+dt+"\n";
+  byRating.slice(0,10).forEach((p,i)=>{ t+=(medals[i]||(i+1)+".")+" "+p.name+" — "+p.rating+" ("+p.wins+"/"+p.games+")\n"; });
+  if(daily.length){ t+="\n⭐ Daily #"+today+"\n"; daily.slice(0,10).forEach((p,i)=>{ t+=(medals[i]||(i+1)+".")+" "+p.name+" — "+fmt(p.dsec)+(p.dm?" · "+p.dm+" mistake"+(p.dm===1?"":"s"):"")+"\n"; }); }
+  return t+"\nMy code: "+grpCode();
+}
+function grpFoot(){ return "\n\nMy Sudoku code (add it in Trends → Your group):\n"+grpCode(); }
+function grpEsc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function grpRender(){
+  const body=$("trendsBody"); if(!body) return;
+  let card=$("grpCard"); if(!card){ card=document.createElement("div"); card.id="grpCard"; card.className="chart-card grp";
+    const rc=body.querySelector(".rank-card"); if(rc) rc.after(card); else body.prepend(card); }
+  const {me, byRating, daily, today}=grpTables(), medals=["🥇","🥈","🥉"];
+  const row=(p,i,val)=>'<tr class="'+(p.id===me.id?"me":"")+'"><td>'+(medals[i]||i+1)+'</td><td class="nm">'+grpEsc(p.name)+'</td><td>'+val+'</td>'+
+    '<td>'+(p.id===me.id?'':'<button class="grp-x" data-id="'+p.id+'" aria-label="Remove '+grpEsc(p.name)+'">✕</button>')+'</td></tr>';
+  card.innerHTML='<h3>👥 Your group</h3>'+
+    (byRating.length<2 ? '<div class="lb-status">Add friends\' codes to see where you stand. Share yours first so they can add you.</div>' : '')+
+    '<table class="lb-table">'+byRating.map((p,i)=>row(p,i,p.rating+' <small>'+p.wins+'/'+p.games+'</small>')).join("")+'</table>'+
+    '<h3 style="margin-top:12px">⭐ Today\'s Daily #'+today+'</h3>'+
+    (daily.length ? '<table class="lb-table">'+daily.map((p,i)=>row(p,i,fmt(p.dsec)+(p.dm?' <small>'+p.dm+' mistake'+(p.dm===1?'':'s')+'</small>':''))).join("")+'</table>'
+                  : '<div class="lb-status">No one in the group has shared today\'s Daily yet.</div>')+
+    '<div class="grp-acts"><button class="btn" id="grpAddBtn">Add friends\' codes</button><button class="btn ghost" id="grpShareBtn">Share the table</button></div>'+
+    '<div class="rating-note">Codes stay on this phone. Nothing is sent anywhere. A code is a snapshot: ask friends to share again after they play.</div>';
+  $("grpAddBtn").onclick=()=>{ $("grpText").value=""; $("grpMsg").textContent=""; $("grpVeil").classList.add("show"); };
+  $("grpShareBtn").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(grpDigest()), "_blank");
+  card.querySelectorAll(".grp-x").forEach(b=>b.onclick=()=>{ const g=store.get("sdk_group",{}), p=g[b.dataset.id];
+    if(p && confirm("Remove "+p.name+" from your group?")){ delete g[b.dataset.id]; store.set("sdk_group",g); grpRender(); } });
+}
+$("grpGo").addEventListener("click",()=>{
+  const r=grpAdd($("grpText").value);
+  if(!r.found){ $("grpMsg").textContent="No codes found. Paste the whole WhatsApp message that has the code in it."; return; }
+  $("grpVeil").classList.remove("show"); showToast(r.added ? "Added "+r.added+" to your group." : "Those codes are already up to date."); grpRender();
+});
+$("grpPaste").addEventListener("click",async()=>{ try{ $("grpText").value=await navigator.clipboard.readText(); }catch(e){ $("grpMsg").textContent="Your phone did not allow pasting here. Long-press the box and choose Paste."; } });
+$("grpCancel").addEventListener("click",()=>$("grpVeil").classList.remove("show"));
 
 /* ---------- boot ---------- */
 $("footNote").textContent="v"+APP_VERSION+" · No ads, ever. No tracking. Your stats stay on this device.";
