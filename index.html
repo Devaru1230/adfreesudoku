@@ -225,6 +225,60 @@ canvas{width:100%;height:auto;display:block}
   border-radius:var(--radius);padding:7px 12px;cursor:pointer;font-family:'JetBrains Mono',monospace;
   font-size:10px;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
 .auto-bar .dismiss{background:none;border:none;color:var(--cream);font-size:16px;cursor:pointer;padding:2px 6px;opacity:.7}
+
+/* ---------- Training: learn the moves ---------- */
+.train{position:fixed;inset:0;z-index:40;background:var(--cream);display:none;justify-content:center;overflow-y:auto}
+.train.show{display:flex}
+.train .tw{width:100%;max-width:480px;padding:10px 12px 18px;display:flex;flex-direction:column;gap:9px}
+.tr-head{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:6px}
+.tr-head h2{font-family:'Fraunces',serif;font-size:19px}
+.tr-head button{border:1px solid var(--ink);background:var(--cellbg);color:var(--ink);border-radius:var(--radius);padding:7px 11px;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:11px;min-height:36px}
+.tr-legend{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tr-legend div{border:1px solid var(--line);background:var(--cellbg);border-radius:var(--radius);padding:8px;font-size:11.5px;line-height:1.4;color:var(--muted)}
+.tr-legend b{display:block;margin-bottom:2px}
+.tr-chip{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;padding:3px 8px;border-radius:999px;
+  border:1px solid currentColor;white-space:nowrap}
+.tr-chip.k0{color:var(--gold-deep);background:color-mix(in srgb, var(--gold) 14%, var(--cellbg))}
+.tr-chip.k1{color:var(--ink);background:color-mix(in srgb, var(--gold) 30%, var(--cellbg))}
+.tr-chip.k2{color:var(--err);background:var(--err-bg);border-style:dashed}
+.tr-chip.k3{color:var(--cream);background:var(--err);border-color:var(--err)}
+.tr-lessons{display:flex;flex-direction:column;gap:7px}
+.tr-lesson{display:flex;align-items:center;gap:10px;border:1px solid var(--ink);background:var(--cellbg);border-radius:var(--radius);padding:10px;
+  cursor:pointer;text-align:left;color:var(--ink);font:inherit;min-height:56px}
+.tr-lesson .n{font-family:'Fraunces',serif;font-size:20px;width:26px;text-align:center;color:var(--gold-deep)}
+.tr-lesson .t{flex:1} .tr-lesson .t b{display:block;font-family:'Fraunces',serif;font-size:15px}
+.tr-lesson .t small{font-size:11.5px;color:var(--muted);line-height:1.35;display:block;margin-top:2px}
+.tr-lesson .s{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:right;white-space:nowrap}
+.tr-lesson.locked{opacity:.7}
+.tr-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tr-top b{font-family:'Fraunces',serif;font-size:15px}
+.tr-shades{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.tr-shades i{display:inline-block;width:14px;height:14px;border:1px solid var(--line);border-radius:2px}
+.tr-shades i.d{background:color-mix(in srgb, var(--gold) 30%, var(--cellbg))} .tr-shades i.l{background:color-mix(in srgb, var(--gold) 14%, var(--cellbg));margin-left:4px}
+.tr-board{width:min(100%, max(240px, calc(100dvh - 360px)));margin:0 auto;position:relative}
+.tr-board .cell.l1{background:color-mix(in srgb, var(--gold) 30%, var(--cellbg))}
+.tr-board .cell.l2{background:color-mix(in srgb, var(--gold) 14%, var(--cellbg))}
+.tr-board .cell.l1.l2{background:color-mix(in srgb, var(--gold) 38%, var(--cellbg))}
+.tr-board .cell.key{box-shadow:inset 0 0 0 2px var(--gold-deep);color:var(--gold-deep)}
+.tr-board .cell.tgt{box-shadow:inset 0 0 0 3px var(--ink);background:var(--sel)}
+.tr-board .cell.tgt::after{content:"?";font-family:'Fraunces',serif;font-weight:700;color:var(--muted);font-size:clamp(14px,4.5vw,22px)}
+.tr-board .cell.tgt.ans::after{content:none}
+.tr-board .cell.ans{color:var(--gold-deep);font-family:'Fraunces',serif;font-weight:700}
+.tr-board .cell.bad{background:var(--err-bg);box-shadow:inset 0 0 0 2px var(--err)}
+.tr-board .notes span.x{color:var(--err);text-decoration:line-through;font-weight:700}
+.tr-board .notes span.k{color:var(--gold-deep);font-weight:700}
+.tr-coach{border:1px solid var(--ink);background:var(--cellbg);border-radius:var(--radius);padding:10px 12px;font-size:13.5px;line-height:1.5;min-height:84px}
+.tr-coach .st{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:3px}
+.tr-coach em{font-style:normal;font-weight:700;color:var(--gold-deep)}
+.tr-acts{display:flex;gap:7px}
+.tr-acts button{flex:1;min-height:42px}
+.tr-pad{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}
+.tr-pad button{border:1px solid var(--line);background:var(--cellbg);border-radius:var(--radius);min-height:42px;cursor:pointer;
+  font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:var(--ink)}
+.tr-pad button.off{opacity:.25}
+.tr-wait{text-align:center;color:var(--muted);font-size:13px;padding:30px 0}
+@media (prefers-reduced-motion: reduce){.tr-board .cell{transition:none}}
 </style>
 </head>
 <body>
@@ -309,12 +363,16 @@ canvas{width:100%;height:auto;display:block}
       <button class="lvl" data-d="2"><b>Hard</b><small>score ×2</small></button>
       <button class="lvl" data-d="3"><b>Expert</b><small>score ×3</small></button>
       <button class="lvl" id="zenBtn"><b>🧘 Zen</b><small>no mistake limit, no timer</small></button>
+      <button class="lvl" id="trainBtn"><b>🎓 Learn the moves</b><small>sure shot to Hail Mary</small></button>
     </div>
     <button class="btn ghost" id="lvlCancel">Cancel</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Training: learn the moves -->
+<div class="train" id="trainView"><div class="tw" id="trainBody"></div></div>
 
 <div class="auto-bar" id="autoBar">
   <span>Almost there — want me to fill in the rest?</span>
@@ -732,8 +790,9 @@ const Billing = {
 };
 
 /* ---------- version ---------- */
-const APP_VERSION="2.5";
+const APP_VERSION="2.6";
 const CHANGELOG=[
+  ["2.6","Learn the moves: lessons that shade the rows, columns and boxes behind each answer, from sure shots to calculated guesses. The first four lessons are free."],
   ["2.5","More recognition for good play, and a flourish when you finish a row, column or box. The strongest words are saved for the hardest deductions."],
   ["2.4","Restart the same puzzle from the pause screen or New game. Fonts are now built into the app, so the look no longer changes when you are offline."],
   ["2.3","Web version. Purchases are handled by Google Play in the Android app."],
@@ -1600,6 +1659,280 @@ document.querySelectorAll(".lvl[data-d]").forEach(b=>b.addEventListener("click",
   saveGame();
 }));
 // resume timer if picker cancelled mid-game handled by resume button flow
+
+
+/* ---------- Training: learn the moves ----------
+   Every example is a real position from a generated puzzle. The coach finds the move with the same
+   logic a strong player uses, shades the level 1 unit (the row, column or box that decides it) and the
+   level 2 lines (what rules the other squares out), then lets the player answer. */
+const TR_KINDS=["Sure shot","Calculated","Calculated guess","Hail Mary"];
+const TR_LESSONS=[
+  {id:"full",  kind:0, pro:0, name:"The last empty square", blurb:"A row, column or box with one gap. The missing number goes there."},
+  {id:"naked", kind:0, pro:0, name:"Nothing else fits",     blurb:"Count the numbers a square can see. When eight are taken, the ninth is the answer."},
+  {id:"hbox",  kind:0, pro:0, name:"One home in the box",   blurb:"Follow a number's lines into a box until only one square is left for it."},
+  {id:"hline", kind:0, pro:0, name:"One home in the line",  blurb:"The same idea along a row or a column."},
+  {id:"point", kind:1, pro:1, name:"Pointing",              blurb:"A number stuck on one line inside a box can't go anywhere else on that line."},
+  {id:"pair",  kind:1, pro:1, name:"Pairs",                 blurb:"Two squares that can only hold the same two numbers claim both of them."},
+  {id:"guess", kind:2, pro:1, name:"When to guess",         blurb:"A calculated guess you can check, versus a Hail Mary you can't."}
+];
+const TR_UNITS=[];
+for(let r=0;r<9;r++) TR_UNITS.push([...Array(9)].map((_,c)=>r*9+c));
+for(let c=0;c<9;c++) TR_UNITS.push([...Array(9)].map((_,r)=>r*9+c));
+for(let b=0;b<9;b++){ const r0=Math.floor(b/3)*3, c0=(b%3)*3, u=[]; for(let r=0;r<3;r++) for(let c=0;c<3;c++) u.push((r0+r)*9+c0+c); TR_UNITS.push(u); }
+const trUnitsOf=i=>[rowOf(i), 9+colOf(i), 18+boxOf(i)];
+const trUnitWord=u=>u<9?"row":u<18?"column":"box";
+function trCands(bd){ return bd.map((v,i)=>v?null:new Set(candidates(bd,i))); }
+/* every single the board offers right now: last square in a unit, naked single, hidden single */
+function trSingles(bd,C){
+  const out=[];
+  TR_UNITS.forEach((u,ui)=>{ const e=u.filter(i=>!bd[i]); if(e.length===1){ const have=new Set(u.map(i=>bd[i])); for(let d=1;d<=9;d++) if(!have.has(d)) out.push({type:"full",cell:e[0],d,unit:ui}); } });
+  for(let i=0;i<81;i++) if(C[i] && C[i].size===1) out.push({type:"naked",cell:i,d:[...C[i]][0]});
+  TR_UNITS.forEach((u,ui)=>{ for(let d=1;d<=9;d++){ if(u.some(i=>bd[i]===d)) continue; const s=u.filter(i=>C[i]&&C[i].has(d)); if(s.length===1) out.push({type:"hidden",cell:s[0],d,unit:ui}); } });
+  return out;
+}
+/* pointing: inside a box, digit d only fits on one row (or column); then d leaves the rest of that line */
+function trPointing(bd,C){
+  const out=[];
+  for(let b=18;b<27;b++) for(let d=1;d<=9;d++){
+    const s=TR_UNITS[b].filter(i=>C[i]&&C[i].has(d)); if(s.length<2) continue;
+    for(const line of [rowOf, colOf]){ const L=line(s[0]); if(!s.every(i=>line(i)===L)) continue;
+      const lu = line===rowOf ? L : 9+L, elim=TR_UNITS[lu].filter(i=>C[i]&&C[i].has(d)&&boxOf(i)!==b-18);
+      if(elim.length) out.push({kind:"point",box:b,line:lu,d,keys:s,elim:elim.map(i=>[i,d])}); }
+  }
+  return out;
+}
+/* naked pair: two squares in a unit with the same two options; those numbers leave the rest of the unit */
+function trPairs(bd,C){
+  const out=[];
+  TR_UNITS.forEach((u,ui)=>{ const two=u.filter(i=>C[i]&&C[i].size===2);
+    for(let a=0;a<two.length;a++) for(let b=a+1;b<two.length;b++){ const A=[...C[two[a]]], B=C[two[b]];
+      if(!(B.has(A[0])&&B.has(A[1]))) continue;
+      const elim=[]; u.forEach(i=>{ if(!C[i]||i===two[a]||i===two[b]) return; A.forEach(d=>{ if(C[i].has(d)) elim.push([i,d]); }); });
+      if(elim.length) out.push({kind:"pair",unit:ui,keys:[two[a],two[b]],ds:A,elim}); } });
+  return out;
+}
+const trCopyC=C=>C.map(s=>s?new Set(s):null);
+/* singles that use eliminated candidates (for the calculated lessons) */
+function trSinglesC(bd,C){ return trSingles(bd,C).filter(m=>m.type!=="full"); }
+/* find an example position for a lesson. Uses the game's own generator with a seeded random stream. */
+function trFind(lesson, seed){
+  const saved=RNG; RNG=mulberry32(seed);
+  try{
+    const diffs={full:[0,1],naked:[1],hbox:[1,0],hline:[1,0],point:[2,3],pair:[2,3],guess:[3]}[lesson];
+    for(let p=0;p<40;p++){
+      const gen=generate(diffs[p%diffs.length]), bd=gen.puzzle.slice(), sol=gen.solution;
+      let C=trCands(bd);
+      for(let step=0;step<81;step++){
+        const empties=bd.filter(v=>!v).length, list=trSinglesC(bd,C).concat(trSingles(bd,C).filter(m=>m.type==="full"));
+        const res=trPick(lesson,bd,C,list,empties,sol);
+        if(res){ res.bd=bd.slice(); res.sol=sol; res.lesson=lesson; return res; }
+        let m=null;
+        if(list.length) m=list[rnd(list.length)];
+        else if(lesson==="guess"){       // keep going with calculated eliminations until even those run out
+          const t=trPointing(bd,C).concat(trPairs(bd,C)); if(!t.length) break;
+          t[0].elim.forEach(([i,d])=>C[i].delete(d)); continue;
+        } else break;
+        if(sol[m.cell]!==m.d) break;      // never happens with valid logic; guard anyway
+        bd[m.cell]=m.d; const keepC=C; C=trCands(bd); if(lesson==="guess") C.forEach((s,i)=>{ if(s&&keepC[i]) for(const d of [...s]) if(!keepC[i].has(d)) s.delete(d); });
+      }
+    }
+    return null;
+  } finally { RNG=saved; }
+}
+function trPick(lesson,bd,C,list,empties,sol){
+  const pickOne=a=>a.length?a[rnd(a.length)]:null;
+  const isHidden=(m,pred)=>list.some(x=>x.type==="hidden"&&x.cell===m.cell&&x.d===m.d&&pred(x.unit));
+  if(lesson==="full"){ if(empties<12||empties>40) return null; const m=pickOne(list.filter(x=>x.type==="full")); return m?{move:m}:null; }
+  if(lesson==="naked"){ if(empties<28) return null;
+    const m=pickOne(list.filter(x=>x.type==="naked" && trUnitsOf(x.cell).every(u=>TR_UNITS[u].filter(i=>!bd[i]).length>=3) && !isHidden(x,()=>true)));
+    return m?{move:m}:null; }
+  if(lesson==="hbox"||lesson==="hline"){ if(empties<30) return null;
+    const box=lesson==="hbox";
+    const m=pickOne(list.filter(x=>x.type==="hidden" && (box?x.unit>=18:x.unit<18) && C[x.cell].size>=3 && !isHidden(x,u=>box?u<18:u>=18)));
+    return m?{move:m}:null; }
+  if(lesson==="point"||lesson==="pair"){ if(list.length || empties<25) return null;
+    const techs=lesson==="point"?trPointing(bd,C):trPairs(bd,C);
+    for(const t of techs){ const C2=trCopyC(C); t.elim.forEach(([i,d])=>C2[i].delete(d));
+      const fresh=trSinglesC(bd,C2).filter(m=>t.elim.some(([i])=>i===m.cell) || (m.type==="hidden" && TR_UNITS[m.unit].some(i=>t.elim.some(([j])=>j===i))));
+      const m=fresh.find(x=>sol[x.cell]===x.d); if(m) return {move:m, tech:t, C:C2, before:C}; }
+    return null; }
+  if(lesson==="guess"){ if(list.length || empties<20 || trPointing(bd,C).length || trPairs(bd,C).length) return null;
+    const two=[],many=[]; for(let i=0;i<81;i++){ if(!C[i]) continue; if(C[i].size===2) two.push(i); else if(C[i].size>=3) many.push(i); }
+    if(!two.length||!many.length) return null;
+    const many4=many.filter(i=>C[i].size>=3); return {cell:two[rnd(two.length)], hail:many4[rnd(many4.length)], C:trCopyC(C)}; }
+  return null;
+}
+/* follow sure shots after a trial number; returns the first dead-end square, or -1 */
+function trDeadEnd(bd,C,cell,d){
+  const b=bd.slice(); let K=trCopyC(C); b[cell]=d; K[cell]=null;
+  PEERS[cell].forEach(p=>{ if(K[p]) K[p].delete(d); });
+  for(let guard=0;guard<81;guard++){
+    for(let i=0;i<81;i++) if(!b[i] && K[i] && K[i].size===0) return i;
+    for(const u of TR_UNITS) for(let x=1;x<=9;x++){ if(u.some(i=>b[i]===x)) continue; if(!u.some(i=>K[i]&&K[i].has(x))) return u.find(i=>!b[i]); }
+    const s=trSingles(b,K).filter(m=>m.type!=="full"); if(!s.length) return -1;
+    const m=s[0]; b[m.cell]=m.d; K[m.cell]=null; PEERS[m.cell].forEach(p=>{ if(K[p]) K[p].delete(m.d); });
+  }
+  return -1;
+}
+
+/* ---------- training screens ---------- */
+const TRV={lesson:null, ex:null, step:0, done:false, seed:0};
+function trProgress(){ return store.get("sdk_train",{}); }
+function trOpen(){
+  if(S && !S.over){ S.paused=true; $("pauseVeil").classList.add("show"); }
+  $("lvlVeil").classList.remove("show"); $("trainView").classList.add("show"); trList();
+}
+function trClose(){ $("trainView").classList.remove("show"); if(!S) showLevelPicker(); }
+function trList(){
+  const pr=trProgress();
+  $("trainBody").innerHTML=
+    '<div class="tr-head"><h2>Learn the moves</h2><button id="trClose">Close</button></div>'+
+    '<div class="tr-legend">'+
+      '<div><span class="tr-chip k0">Sure shot</span><b></b>The board proves it in one look.</div>'+
+      '<div><span class="tr-chip k1">Calculated</span><b></b>Proven, after you rule a few things out.</div>'+
+      '<div><span class="tr-chip k2">Calculated guess</span><b></b>Two options left, and you can test one.</div>'+
+      '<div><span class="tr-chip k3">Hail Mary</span><b></b>Three or more options and no way to check.</div>'+
+    '</div>'+
+    '<div class="tr-lessons">'+TR_LESSONS.map((l,k)=>{ const locked=l.pro&&!isPro(), n=pr[l.id]||0;
+      return '<button class="tr-lesson'+(locked?' locked':'')+'" data-l="'+l.id+'"><span class="n">'+(k+1)+'</span><span class="t"><b>'+l.name+'</b><small>'+l.blurb+'</small></span>'+
+        '<span class="s"><span class="tr-chip k'+l.kind+'">'+TR_KINDS[l.kind]+'</span><br>'+(locked?'🔒 Pro':n?('✓ '+n+' solved'):'')+'</span></button>'; }).join("")+
+    '</div>';
+  $("trClose").onclick=trClose;
+  $("trainBody").querySelectorAll(".tr-lesson").forEach(b=>b.onclick=()=>{
+    const l=TR_LESSONS.find(x=>x.id===b.dataset.l);
+    if(l.pro && !isPro()){ showPaywall("The calculated lessons and When to guess are part of Pro. The four sure-shot lessons are free."); return; }
+    trStart(l);
+  });
+}
+function trStart(l){
+  TRV.lesson=l; TRV.ex=null; TRV.step=0; TRV.done=false;
+  $("trainBody").innerHTML='<div class="tr-head"><h2>'+l.name+'</h2><button id="trBack">Lessons</button></div><div class="tr-wait">Finding a good example…</div>';
+  $("trBack").onclick=trList;
+  setTimeout(()=>{
+    let ex=null; for(let k=0;k<6 && !ex;k++){ TRV.seed=(store.get("sdk_train_seed",1)+k*7919)|0; ex=trFind(l.id, TRV.seed); }
+    store.set("sdk_train_seed", (TRV.seed+104729)%2147483647);
+    if(TRV.lesson!==l) return;
+    if(!ex){ $("trainBody").querySelector(".tr-wait").textContent="No example found this time. Tap Lessons and try again."; return; }
+    TRV.ex=ex; trDraw();
+  }, 30);
+}
+function trDraw(){
+  const l=TRV.lesson, ex=TRV.ex;
+  const kind = l.id==="guess" ? (TRV.step>=2?3:2) : l.kind;
+  $("trainBody").innerHTML=
+    '<div class="tr-head"><h2>'+l.name+'</h2><button id="trBack">Lessons</button></div>'+
+    '<div class="tr-top"><span class="tr-chip k'+kind+'">'+TR_KINDS[kind]+'</span>'+(l.id==="guess"?'':'<span class="tr-shades"><i class="d"></i>level 1 <i class="l"></i>level 2</span>')+'</div>'+
+    '<div class="board tr-board" id="trBoard"></div>'+
+    '<div class="tr-coach" id="trCoach"></div>'+
+    '<div class="tr-acts" id="trActs"></div>'+
+    '<div class="tr-pad" id="trPad"></div>';
+  $("trBack").onclick=trList;
+  const bEl=$("trBoard");
+  for(let i=0;i<81;i++){ const c=document.createElement("div"); c.className="cell"; if(colOf(i)%3===2&&colOf(i)!==8) c.classList.add("b-r"); if(rowOf(i)%3===2&&rowOf(i)!==8) c.classList.add("b-b"); c.dataset.i=i; bEl.appendChild(c); }
+  trPaint();
+}
+function trSet(i,cls){ const c=$("trBoard").children[i]; if(c) c.classList.add(cls); }
+function trNotes(i,C,mark){ const c=$("trBoard").children[i]; let h='<div class="notes">';
+  for(let d=1;d<=9;d++){ const has=C[i]&&C[i].has(d), m=mark&&mark[d]; h+='<span'+(m?' class="'+m+'"':'')+'>'+(has||m?d:"")+'</span>'; } c.innerHTML=h+'</div>'; }
+function trPaint(){
+  const l=TRV.lesson, ex=TRV.ex, bd=ex.bd, st=TRV.step, cells=$("trBoard").children;
+  for(let i=0;i<81;i++){ const c=cells[i]; c.className=c.className.split(" ").filter(x=>x==="cell"||x==="b-r"||x==="b-b").join(" "); c.innerHTML=""; if(bd[i]){ c.textContent=bd[i]; c.classList.add("given"); } }
+  if(l.id==="guess") return trPaintGuess();
+  const m=ex.move, tgt=m.cell; let say="", acts=[];
+  const W=u=>"this "+trUnitWord(u);
+  if(l.id==="full"){
+    if(st>=1){ TR_UNITS[m.unit].forEach(i=>trSet(i,"l1")); }
+    say = st===0 ? "What goes in the marked square?" :
+      "Level 1: "+W(m.unit)+" already has eight numbers. The only one missing is <em>"+m.d+"</em>.";
+  } else if(l.id==="naked"){
+    const [r,c,b]=trUnitsOf(tgt), seen=u=>[...new Set(TR_UNITS[u].map(i=>bd[i]).filter(Boolean))].sort();
+    if(st>=1){ TR_UNITS[r].forEach(i=>trSet(i,"l1")); TR_UNITS[c].forEach(i=>trSet(i,"l1")); }
+    if(st>=2){ TR_UNITS[b].forEach(i=>trSet(i,"l2")); }
+    const rc=[...new Set(seen(r).concat(seen(c)))].sort(), all=[...new Set(rc.concat(seen(b)))].sort();
+    say = st===0 ? "What goes in the marked square? Tap a number, or tap Show me why." :
+      st===1 ? "Level 1: the row and column through the square already hold <em>"+rc.join(" ")+"</em>." :
+      "Level 2: the box adds the rest. Together they hold <em>"+all.join(" ")+"</em>. Only <em>"+m.d+"</em> is left.";
+  } else if(l.id==="hbox"||l.id==="hline"){
+    const u=m.unit, d=m.d, others=TR_UNITS[u].filter(i=>!bd[i]&&i!==tgt), keys=new Set(), lines=new Set();
+    others.forEach(e=>{ const blk=PEERS[e].find(p=>bd[p]===d); if(blk!=null){ keys.add(blk); const lu=trUnitsOf(e).find(x=>trUnitsOf(blk).includes(x)); lines.add(lu); } });
+    if(st>=1) TR_UNITS[u].forEach(i=>trSet(i,"l1"));
+    if(st>=2){ lines.forEach(x=>TR_UNITS[x].forEach(i=>trSet(i,"l2"))); keys.forEach(k=>trSet(k,"key")); }
+    say = st===0 ? "Where does <em>"+d+"</em> go in "+W(u)+"? The marked square is the answer. Which number belongs there?" :
+      st===1 ? "Level 1: look at "+W(u)+" (dark shade). It still needs a <em>"+d+"</em>, and it has "+(others.length+1)+" empty squares." :
+      "Level 2: each outlined <em>"+d+"</em> rules out its own row, column and box (light shade). Every other empty square in "+W(u)+" sits on one of those lines, so <em>"+d+"</em> has one home.";
+  } else {
+    const t=ex.tech, d2=m.d;
+    if(st>=1){ (t.kind==="point"?TR_UNITS[t.box]:t.keys).forEach(i=>trSet(i,"l1")); t.keys.forEach(i=>{ trSet(i,"key"); trNotes(i,ex.before, t.kind==="point"?{[t.d]:"k"}:Object.fromEntries(t.ds.map(x=>[x,"k"]))); }); }
+    if(st>=2){ (t.kind==="point"?TR_UNITS[t.line].filter(i=>boxOf(i)!==t.box-18):TR_UNITS[t.unit].filter(i=>!t.keys.includes(i))).forEach(i=>trSet(i,"l2"));
+      const byCell={}; t.elim.forEach(([i,d])=>{ (byCell[i]=byCell[i]||{})[d]="x"; }); Object.entries(byCell).forEach(([i,mk])=>{ if(+i!==tgt) trNotes(+i,ex.before,mk); }); }
+    const why = m.type==="naked" ? "now only <em>"+d2+"</em> fits" : "<em>"+d2+"</em> now has only this home in "+W(m.unit);
+    say = st===0 ? "No sure shot is left on this board. What goes in the marked square?" :
+      t.kind==="point" ? (st===1 ? "Level 1: in the dark box, <em>"+t.d+"</em> can only sit in the outlined squares, and they all lie on one "+trUnitWord(t.line)+"." :
+                                   "Level 2: so <em>"+t.d+"</em> can't go anywhere else on that "+trUnitWord(t.line)+" (light shade, crossed out). With that gone, "+why+".") :
+      (st===1 ? "Level 1: the two outlined squares can only be <em>"+t.ds.join(" or ")+"</em>. Between them they take both numbers." :
+                "Level 2: so <em>"+t.ds.join(" and ")+"</em> leave every other square in "+W(t.unit)+" (light shade, crossed out). Now "+why+".");
+  }
+  trSet(tgt,"tgt");
+  if(TRV.done){ const c=cells[tgt]; c.classList.add("ans"); c.textContent=m.d; }
+  $("trCoach").innerHTML='<span class="st">'+(TRV.done?"Solved":st===0?"Your move":"Step "+st+" of "+(l.id==="full"?1:2))+'</span>'+say;
+  const maxStep = l.id==="full" ? 1 : 2;
+  $("trActs").innerHTML = (TRV.done ? '<button class="btn" id="trNext">Next example</button>' : (st<maxStep ? '<button class="btn ghost" id="trWhy">Show me why</button>' : ''));
+  if($("trWhy")) $("trWhy").onclick=()=>{ TRV.step++; buzz(BZ.tap); trPaint(); };
+  if($("trNext")) $("trNext").onclick=()=>trStart(TRV.lesson);
+  trPad(d=>trAnswer(d));
+}
+function trPad(onTap, only){
+  const p=$("trPad"); p.innerHTML="";
+  for(let d=1;d<=9;d++){ const b=document.createElement("button"); b.textContent=d; if(only && !only.includes(d)) b.classList.add("off");
+    b.addEventListener("pointerdown",e=>{ e.preventDefault(); if(TRV.done) return; if(only && !only.includes(d)) return; onTap(d); }); p.appendChild(b); }
+}
+function trAnswer(d){
+  const ex=TRV.ex, m=ex.move, cells=$("trBoard").children, l=TRV.lesson;
+  if(d===m.d){
+    TRV.done=true; TRV.step=l.id==="full"?1:2; buzz(BZ.act);
+    const pr=trProgress(); pr[l.id]=(pr[l.id]||0)+1; store.set("sdk_train",pr);
+    trPaint(); popCell(cells[m.cell]);
+    $("trCoach").innerHTML='<span class="st">'+TR_KINDS[l.kind]+'</span><em>'+d+'</em> is right. '+$("trCoach").innerHTML.replace(/<span class="st">.*?<\/span>/,"");
+    return;
+  }
+  buzz(BZ.err); const c=cells[m.cell]; c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash");
+  const clash=PEERS[m.cell].find(p=>ex.bd[p]===d);
+  if(clash!=null){ trSet(clash,"bad"); $("trCoach").innerHTML='<span class="st">Not '+d+'</span>There is already a <em>'+d+'</em> in the same '+trUnitWord(trUnitsOf(m.cell).find(u=>trUnitsOf(clash).includes(u)))+' (red). Try again, or tap Show me why.'; }
+  else { if(TRV.step<(l.id==="full"?1:2)){ TRV.step++; trPaint(); }
+    $("trCoach").innerHTML='<span class="st">Not '+d+'</span><em>'+d+'</em> is not ruled out by a single glance, but the shading shows why it can\'t be. '+$("trCoach").innerHTML.replace(/<span class="st">.*?<\/span>/,""); }
+}
+function trPaintGuess(){
+  const ex=TRV.ex, C=ex.C, st=TRV.step, cells=$("trBoard").children, opts=[...C[ex.cell]];
+  for(let i=0;i<81;i++) if(!ex.bd[i]) trNotes(i,C);
+  trSet(ex.cell,"tgt"); trSet(ex.cell,"key"); cells[ex.cell].classList.add("ans");
+  let say="", acts="";
+  if(st===0){
+    say="Pencil marks show every option left. No sure shot or calculated move works here, so it is time to choose. The outlined square has only two options, <em>"+opts.join(" or ")+"</em>. Choosing between two, and checking, is a <em>calculated guess</em>. Pick one to test.";
+    trPad(d=>trTry(d), opts);
+  } else if(st===1){
+    say=TRV.tryMsg; trPad(()=>{}, []);
+    acts='<button class="btn ghost" id="trHail">And a Hail Mary?</button>';
+  } else {
+    const h=ex.hail, n=C[h].size; trSet(h,"bad");
+    say="Now the red square: it has <em>"+n+"</em> options ("+[...C[h]].join(" ")+"). Guessing there is a <em>Hail Mary</em>: a 1 in "+n+" chance, and a wrong guess may not show up until much later. Always look for a two-option square first.";
+    trPad(()=>{}, []); acts='<button class="btn" id="trNext">Next example</button>';
+    if(!TRV.done){ TRV.done=true; const pr=trProgress(); pr.guess=(pr.guess||0)+1; store.set("sdk_train",pr); }
+  }
+  $("trCoach").innerHTML='<span class="st">'+(st<2?"Calculated guess":"Hail Mary")+'</span>'+say;
+  $("trActs").innerHTML=acts;
+  if($("trHail")) $("trHail").onclick=()=>{ TRV.step=2; trDraw(); };
+  if($("trNext")) $("trNext").onclick=()=>trStart(TRV.lesson);
+}
+function trTry(d){
+  const ex=TRV.ex, right=ex.sol[ex.cell], other=[...ex.C[ex.cell]].find(x=>x!==d);
+  const dead=trDeadEnd(ex.bd, ex.C, ex.cell, d);
+  if(d!==right && dead>=0) TRV.tryMsg="Testing <em>"+d+"</em> and following the sure shots runs into a dead end at the red square: no number fits there. So <em>"+other+"</em> must be right. That is a calculated guess done well: test one side, and a dead end proves the other.";
+  else if(d===right) TRV.tryMsg="<em>"+d+"</em> holds up: the sure shots that follow keep fitting. Good choice. If it had been wrong, a dead end would have shown up, and you would switch to <em>"+other+"</em>.";
+  else TRV.tryMsg="<em>"+d+"</em> is wrong, but the dead end only appears much later, so keep pencil marks and be ready to undo. The answer here is <em>"+right+"</em>.";
+  TRV.step=1; buzz(d===right?BZ.act:BZ.tap); trDraw();
+  if(d!==right && dead>=0) trSet(dead,"bad");
+}
+$("trainBtn").addEventListener("click", trOpen);
 
 /* ---------- boot ---------- */
 $("footNote").textContent="v"+APP_VERSION+" · No ads, ever. No tracking. Your stats stay on this device.";
