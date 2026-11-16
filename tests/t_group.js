@@ -54,7 +54,7 @@ const F='file://'+path.resolve(__dirname,'../index.html');
   ok("an older code never replaces a newer one", older!==1);
   await M.p.evaluate(()=>{ window.confirm=()=>true; }); await M.p.locator('#grpCard .grp-x').first().click(); await M.p.waitForTimeout(100);
   ok("a player can be removed", await M.p.evaluate(()=>Object.keys(store.get("sdk_group",{})).length===1));
-  await M.p.reload(); await M.p.waitForTimeout(500); await M.p.evaluate(()=>document.querySelectorAll('.veil.show').forEach(v=>v.classList.remove('show'))); await M.p.click('#tabTrends'); await M.p.waitForTimeout(150);
+  await M.p.reload(); await M.p.waitForTimeout(500); await M.p.evaluate(()=>document.querySelectorAll('.veil.show').forEach(v=>v.classList.remove('show'))); await M.p.click('#tabTrends'); await M.p.waitForSelector('#grpCard table tr');
   ok("the group is kept after closing the app", await M.p.evaluate(()=>document.querySelectorAll('#grpCard table')[0].querySelectorAll('tr').length===2));
   ok("no network requests and no page errors with the group ranking", ext.length===0 && errs.length===0, ext.concat(errs).join(" | "));
   await A.ctx.close(); await V.ctx.close(); await M.ctx.close();
