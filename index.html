@@ -499,6 +499,7 @@ canvas{width:100%;height:auto;display:block}
 const LB = { url: "", key: "" };
 const LB_TABLE = "sudoku_players";
 function lbOn(){ return !!(LB.url && LB.key); }
+function lbPid(){ return grpHash(deviceId+"#lb"); }
 function lbJoined(){ return !!store.get("sdk_lb_join", false); }
 
 const store = (() => {
@@ -1444,22 +1445,17 @@ async function pushStats(){
   if(!lbOn() || !profile || !lbJoined()) return;
   const recs=store.get("sdk_records",[]);
   const {rating}=playerRating(recs);
-  const body={ id:deviceId, name:profile.name, rating:rating||0,
-    games:recs.length, wins:recs.filter(r=>r.w).length,
-    best_score:recs.length?Math.max(...recs.map(r=>r.sc)):0,
-    updated_at:new Date().toISOString() };
+  const body={ p_id:deviceId, p_pid:lbPid(), p_name:profile.name.slice(0,24), p_rating:rating||0,
+    p_games:recs.length, p_wins:recs.filter(r=>r.w).length,
+    p_best:recs.length?Math.max(...recs.map(r=>r.sc)):0 };
   try{
-    await fetch(LB.url+"/rest/v1/"+LB_TABLE, {
-      method:"POST",
-      headers:Object.assign(lbHeaders(),{Prefer:"resolution=merge-duplicates"}),
-      body:JSON.stringify(body)
-    });
+    await fetch(LB.url+"/rest/v1/rpc/sudoku_submit", { method:"POST", headers:lbHeaders(), body:JSON.stringify(body) });
   }catch(e){ /* offline is fine — next win syncs */ }
 }
 async function fetchBoard(){
   if(!lbOn() || !lbJoined()) return null;
   try{
-    const r=await fetch(LB.url+"/rest/v1/"+LB_TABLE+"?select=*&order=rating.desc&limit=50",{headers:lbHeaders()});
+    const r=await fetch(LB.url+"/rest/v1/"+LB_TABLE+"?select=pid,name,rating,games,wins,best_score&order=rating.desc&limit=50",{headers:lbHeaders()});
     if(!r.ok) return null;
     return await r.json();
   }catch(e){ return null; }
@@ -1481,7 +1477,7 @@ async function renderLeaderboard(){
   let h='<table class="lb-table">';
   const medals=["🥇","🥈","🥉"];
   rows.forEach((p,i)=>{
-    h+='<tr class="'+(p.id===deviceId?"me":"")+'"><td>'+(medals[i]||i+1)+'</td><td class="nm">'+String(p.name).slice(0,20)+'</td><td>'+p.rating+'</td><td>'+p.wins+'/'+p.games+'</td></tr>';
+    h+='<tr class="'+(p.pid===lbPid()?"me":"")+'"><td>'+(medals[i]||i+1)+'</td><td class="nm">'+grpEsc(String(p.name).slice(0,20))+'</td><td>'+(+p.rating||0)+'</td><td>'+(+p.wins||0)+'/'+(+p.games||0)+'</td></tr>';
   });
   el.innerHTML=h+'</table>';
   const cb=$("lbCopy");
@@ -1570,7 +1566,11 @@ function renderTrends(){
 }
 function wireShare(recs,rating,tier){
   const j=$("lbJoin"); if(j) j.onclick=()=>{ if(!confirm("Join the global leaderboard?\n\nYour player name, rating, games and wins will be sent to the leaderboard server. Nothing else is sent.")) return; store.set("sdk_lb_join",true); pushStats(); renderTrends(); };
-  const lv=$("lbLeave"); if(lv) lv.onclick=e=>{ e.preventDefault(); store.set("sdk_lb_join",false); showToast("You have left. Nothing more will be sent."); renderTrends(); };
+  const lv=$("lbLeave"); if(lv) lv.onclick=async e=>{ e.preventDefault(); if(!confirm("Leave the global leaderboard?\n\nYour entry is deleted and nothing more is sent.")) return;
+    store.set("sdk_lb_join",false);
+    try{ const r=await fetch(LB.url+"/rest/v1/rpc/sudoku_leave",{method:"POST",headers:lbHeaders(),body:JSON.stringify({p_id:deviceId})}); showToast(r.ok?"You have left. Your entry is deleted.":"You have left. Your entry will stay until you are online."); }
+    catch(err){ showToast("You have left. Nothing more will be sent."); }
+    renderTrends(); };
   const b=$("shareRank"); if(!b) return;
   b.addEventListener("click",async()=>{
     const wins=recs.filter(r=>r.w).length;
