@@ -496,7 +496,7 @@ canvas{width:100%;height:auto;display:block}
    3. Paste your Project URL and anon public key below, save, re-share the file
    Leave blank = leaderboard stays off, game works fully offline.
    ================================================================ */
-const LB = { url: "", key: "" };
+const LB = { url: "https://tnpvyldbzywnqqvqmmxj.supabase.co", key: "sb_publishable_PwnP82zB3zl97IcYdwEdKA_xnEwVb7v" };   // public key: safe in the page
 const LB_TABLE = "sudoku_players";
 function lbOn(){ return !!(LB.url && LB.key); }
 function lbPid(){ return grpHash(deviceId+"#lb"); }
@@ -1440,7 +1440,7 @@ $("endClose").addEventListener("click",()=>$("endVeil").classList.remove("show")
 
 
 /* ---------- leaderboard sync ---------- */
-function lbHeaders(){ return {apikey:LB.key, Authorization:"Bearer "+LB.key, "Content-Type":"application/json"}; }
+function lbHeaders(){ const h = {apikey:LB.key, "Content-Type":"application/json"}; if(/^eyJ/.test(LB.key)) h.Authorization = "Bearer "+LB.key; return h; }   // new publishable keys go in apikey only
 async function pushStats(){
   if(!lbOn() || !profile || !lbJoined()) return;
   const recs=store.get("sdk_records",[]);
