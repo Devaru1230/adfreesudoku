@@ -811,8 +811,9 @@ const Billing = {
 };
 
 /* ---------- version ---------- */
-const APP_VERSION="2.7";
+const APP_VERSION="2.8";
 const CHANGELOG=[
+  ["2.8","An optional global leaderboard: tap Join in Trends to see where you stand worldwide. Nothing is sent until you join, and Leave deletes your entry."],
   ["2.7","Your group: every shared result now carries a code. Paste friends' messages in Trends to rank your group and see who solved today's Daily fastest. Nothing is sent anywhere."],
   ["2.6","Learn the moves: lessons that shade the rows, columns and boxes behind each answer, from sure shots to calculated guesses. The first four lessons are free."],
   ["2.5","More recognition for good play, and a flourish when you finish a row, column or box. The strongest words are saved for the hardest deductions."],
@@ -1513,9 +1514,9 @@ function renderTrends(){
       '<div class="sub">Rating = complexity × time × accuracy, best 5 solves</div>'+
       '<button class="btn" id="shareRank">Share my rank</button>'+
       (lbOn() && lbJoined()
-        ? '<div class="rating-note">You are on the global leaderboard: your player name, rating, games and wins are sent to it. <a href="#" id="lbLeave">Leave</a></div>'
+        ? '<div class="rating-note">You are on the global leaderboard: your player name, rating, games, wins and best score are sent to it. <a href="#" id="lbLeave">Leave</a></div>'
         : lbOn()
-        ? '<button class="btn ghost" id="lbJoin">Join the global leaderboard</button><div class="rating-note">Joining sends your player name, rating, games and wins to the leaderboard server. Nothing else. Until you join, nothing is sent.</div>'
+        ? '<button class="btn ghost" id="lbJoin">Join the global leaderboard</button><div class="rating-note">Joining sends your player name, rating, games, wins and best score to the leaderboard. Nothing else. Until you join, nothing is sent.</div>'
         : '<div class="rating-note">Ratings live on each player\'s device. Add friends\' codes below to rank your group.</div>')+
     '</div>'+
     (lbOn() && lbJoined()
@@ -1565,7 +1566,7 @@ function renderTrends(){
   drawLine($("chTime"), winRecs.map(r=>r.sec), winRecs.map(()=>1), fmtAxisTime, true);
 }
 function wireShare(recs,rating,tier){
-  const j=$("lbJoin"); if(j) j.onclick=()=>{ if(!confirm("Join the global leaderboard?\n\nYour player name, rating, games and wins will be sent to the leaderboard server. Nothing else is sent.")) return; store.set("sdk_lb_join",true); pushStats(); renderTrends(); };
+  const j=$("lbJoin"); if(j) j.onclick=()=>{ if(!confirm("Join the global leaderboard?\n\nYour player name, rating, games, wins and best score will be sent to the leaderboard. Nothing else is sent. You can leave at any time.")) return; store.set("sdk_lb_join",true); pushStats(); renderTrends(); };
   const lv=$("lbLeave"); if(lv) lv.onclick=async e=>{ e.preventDefault(); if(!confirm("Leave the global leaderboard?\n\nYour entry is deleted and nothing more is sent.")) return;
     store.set("sdk_lb_join",false);
     try{ const r=await fetch(LB.url+"/rest/v1/rpc/sudoku_leave",{method:"POST",headers:lbHeaders(),body:JSON.stringify({p_id:deviceId})}); showToast(r.ok?"You have left. Your entry is deleted.":"You have left. Your entry will stay until you are online."); }
